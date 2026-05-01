@@ -100,12 +100,36 @@ export const addProposal = (p: Proposal) => {
 export const castVote = (proposalId: string, vote: 'for' | 'against', memberId: string, txHash: string) => {
   const db = readDB();
   const p = db.proposals.find((x: any) => x.id === proposalId);
-  if (p) {
-    if (vote === 'for') p.votesFor++;
-    else p.votesAgainst++;
-    p.votes.push({ memberId, vote, txHash });
-    writeDB(db);
-    return true;
+  
+  if (!p || p.status !== 'active') return false;
+
+  // 1. Limiter à 1 vote par personne
+  const alreadyVoted = p.votes.some((v: any) => v.memberId === memberId);
+  if (alreadyVoted) return false;
+
+  // 2. Enregistrer le vote
+  if (vote === 'for') p.votesFor++;
+  else p.votesAgainst++;
+  
+  p.votes.push({ memberId, vote, txHash });
+
+  // 3. Logique de conclusion (Exemple: Se termine à 100 votes ou si une majorité est claire)
+  const totalVotes = p.votesFor + p.votesAgainst;
+  if (totalVotes >= 150) { // Seuil de conclusion arbitraire pour la démo
+    p.status = p.votesFor > p.votesAgainst ? 'approved' : 'rejected';
   }
-  return false;
+
+  // 4. Enregistrer dans le Ledger (Transactions) pour la traçabilité
+  db.transactions.unshift({
+    id: 'block_' + Date.now(),
+    date: new Date().toISOString().split('T')[0],
+    description: `VOTE SCÉLLÉ: ${p.title} (${vote === 'for' ? 'POUR' : 'CONTRE'})`,
+    amount: 0,
+    type: 'credit',
+    category: 'Gouvernance',
+    txHash: txHash
+  });
+
+  writeDB(db);
+  return true;
 };

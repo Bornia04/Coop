@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import 'proposal_detail_screen.dart';
 
@@ -27,6 +29,8 @@ class _VotingScreenState extends State<VotingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthService>();
+
     return Scaffold(
       backgroundColor: const Color(0xFF020617),
       appBar: AppBar(
@@ -95,6 +99,7 @@ class _VotingScreenState extends State<VotingScreen> {
                   progress,
                   p['status'] == 'active',
                   totalVotes,
+                  auth.userId ?? 'anonymous',
                 ),
               );
             },
@@ -104,8 +109,8 @@ class _VotingScreenState extends State<VotingScreen> {
     );
   }
 
-  void _handleVote(BuildContext context, String proposalId, String title, String vote) async {
-    final success = await _apiService.castVote(proposalId, vote);
+  void _handleVote(BuildContext context, String proposalId, String title, String vote, String memberId) async {
+    final success = await _apiService.castVote(proposalId, vote, memberId);
     
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -115,10 +120,17 @@ class _VotingScreenState extends State<VotingScreen> {
         ),
       );
       _refreshProposals();
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur : Vous avez déjà voté ou le vote est clos.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
   }
 
-  Widget _buildVoteCard(BuildContext context, String id, String title, String desc, double progress, bool isActive, int totalVotes) {
+  Widget _buildVoteCard(BuildContext context, String id, String title, String desc, double progress, bool isActive, int totalVotes, String memberId) {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
@@ -210,14 +222,14 @@ class _VotingScreenState extends State<VotingScreen> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => _handleVote(context, id, title, 'POUR'),
+                      onPressed: () => _handleVote(context, id, title, 'POUR', memberId),
                       child: const Text('POUR', style: TextStyle(fontWeight: FontWeight.w900)),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => _handleVote(context, id, title, 'CONTRE'),
+                      onPressed: () => _handleVote(context, id, title, 'CONTRE', memberId),
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.red.withOpacity(0.3)),
                         padding: const EdgeInsets.symmetric(vertical: 18),

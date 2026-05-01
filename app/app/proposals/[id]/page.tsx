@@ -12,6 +12,8 @@ export default function ProposalDetail() {
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const fetchProposal = () => {
     fetch('/api/proposals')
       .then(res => res.json())
@@ -29,14 +31,24 @@ export default function ProposalDetail() {
 
   const handleVote = async (vote: 'for' | 'against') => {
     setVoting(true);
+    setError(null);
     const txHash = await generateTxHash({ id, vote, ts: Date.now() });
     
-    await fetch('/api/vote', {
+    const response = await fetch('/api/vote', {
       method: 'POST',
-      body: JSON.stringify({ proposalId: id, vote, memberId: localStorage.getItem('user_name') || 'M1', txHash })
+      body: JSON.stringify({ 
+        proposalId: id, 
+        vote, 
+        memberId: localStorage.getItem('user_name') || 'M1', 
+        txHash 
+      })
     });
     
-    fetchProposal();
+    if (!response.ok) {
+      setError('Vous avez déjà voté ou le vote est clos.');
+    } else {
+      fetchProposal();
+    }
     setVoting(false);
   };
 
@@ -144,6 +156,12 @@ export default function ProposalDetail() {
                   <span style={{ fontWeight: 800, color: '#059669' }}>51%</span>
                 </div>
               </div>
+              
+              {error && (
+                <div style={{ background: '#FEF2F2', color: '#EF4444', padding: '1rem', borderRadius: '12px', fontSize: '0.9rem', fontWeight: 800, marginBottom: '1.5rem', textAlign: 'center', border: '1px solid #FECACA' }}>
+                  {error}
+                </div>
+              )}
               
               {isActive ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

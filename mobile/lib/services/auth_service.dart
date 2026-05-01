@@ -6,11 +6,13 @@ class AuthService extends ChangeNotifier {
   bool _isAuthenticated = false;
   String _userName = 'Utilisateur';
   String? _role;
+  String? _userId;
   final ApiService _apiService = ApiService();
 
   bool get isAuthenticated => _isAuthenticated;
   String get userName => _userName;
   String? get role => _role;
+  String? get userId => _userId;
 
   AuthService() {
     _loadSession();
@@ -23,6 +25,7 @@ class AuthService extends ChangeNotifier {
       _isAuthenticated = true;
       _userName = prefs.getString('user_name') ?? 'Utilisateur';
       _role = prefs.getString('user_role');
+      _userId = prefs.getString('user_id');
       notifyListeners();
     }
   }
@@ -35,10 +38,12 @@ class AuthService extends ChangeNotifier {
       await prefs.setString('auth_token', result['token']);
       await prefs.setString('user_name', result['user']['name']);
       await prefs.setString('user_role', role);
+      await prefs.setString('user_id', result['user']['id']);
 
       _isAuthenticated = true;
       _userName = result['user']['name'];
       _role = role;
+      _userId = result['user']['id'];
       notifyListeners();
       return true;
     }
@@ -50,6 +55,7 @@ class AuthService extends ChangeNotifier {
     await prefs.clear();
     _isAuthenticated = false;
     _role = null;
+    _userId = null;
     notifyListeners();
   }
 }

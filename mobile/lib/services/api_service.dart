@@ -48,14 +48,14 @@ class ApiService {
     }
   }
 
-  Future<bool> castVote(String proposalId, String voteType) async {
+  Future<bool> castVote(String proposalId, String voteType, String memberId) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/vote'),
         body: json.encode({
           'proposalId': proposalId,
           'vote': voteType == 'POUR' ? 'for' : 'against',
-          'memberId': 'm_mobile_user',
+          'memberId': memberId,
           'txHash': '0x' + DateTime.now().millisecondsSinceEpoch.toRadixString(16),
         }),
         headers: await _getHeaders(),
