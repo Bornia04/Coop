@@ -1,18 +1,74 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import '../services/api_service.dart';
 
-class ProposalDetailScreen extends StatelessWidget {
+class ProposalDetailScreen extends StatefulWidget {
+  final String id;
   final String title;
   final String description;
   final double progress;
   final bool isActive;
+  final String expiresAt;
+  final int votesFor;
+  final int votesAgainst;
+  final List<dynamic> votes;
 
   const ProposalDetailScreen({
     super.key,
+    required this.id,
     required this.title,
     required this.description,
     required this.progress,
     required this.isActive,
+    required this.expiresAt,
+    required this.votesFor,
+    required this.votesAgainst,
+    required this.votes,
   });
+
+  @override
+  State<ProposalDetailScreen> createState() => _ProposalDetailScreenState();
+}
+
+class _ProposalDetailScreenState extends State<ProposalDetailScreen> {
+  late Timer _timer;
+  String _timeLeft = '';
+  bool _isClosed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isClosed = !widget.isActive;
+    _startTimer();
+  }
+
+  void _startTimer() {
+    if (_isClosed || widget.expiresAt.isEmpty) return;
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final now = DateTime.now();
+      final end = DateTime.parse(widget.expiresAt);
+      final diff = end.difference(now);
+
+      if (diff.isNegative) {
+        setState(() {
+          _timeLeft = 'EXPIRÉ';
+          _isClosed = true;
+        });
+        timer.cancel();
+      } else {
+        setState(() {
+          _timeLeft = '${diff.inMinutes}:${(diff.inSeconds % 60).toString().padLeft(2, '0')}';
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,29 +88,45 @@ class ProposalDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: Text(
-                isActive ? 'VOTE EN COURS' : 'ARCHIVÉ',
-                style: TextStyle(
-                  color: isActive ? const Color(0xFF34D399) : Colors.white54,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: !_isClosed ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: Text(
+                    !_isClosed ? 'VOTE EN COURS' : 'ARCHIVÉ / TERMINÉ',
+                    style: TextStyle(
+                      color: !_isClosed ? const Color(0xFF34D399) : Colors.white54,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
-              ),
+                if (!_isClosed && _timeLeft.isNotEmpty)
+                  Row(
+                    children: [
+                      const Icon(Icons.timer_outlined, color: Colors.redAccent, size: 16),
+                      const SizedBox(width: 8),
+                      Text(
+                        _timeLeft,
+                        style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w900, fontSize: 16),
+                      ),
+                    ],
+                  ),
+              ],
             ),
             const SizedBox(height: 24),
             Text(
-              title,
+              widget.title,
               style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 16),
             Text(
-              description,
+              widget.description,
               style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 18, height: 1.6),
             ),
             const SizedBox(height: 40),
@@ -67,11 +139,6 @@ class ProposalDetailScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _buildAuditTrail(),
             const SizedBox(height: 40),
-            if (isActive)
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Voter maintenant'),
-              ),
           ],
         ),
       ),
@@ -92,12 +159,12 @@ class ProposalDetailScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Résultats actuels', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
-              Text('${(progress * 100).toInt()}% Pour', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900)),
+              Text('${(widget.progress * 100).toInt()}% Pour', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900)),
             ],
           ),
           const SizedBox(height: 20),
           LinearProgressIndicator(
-            value: progress,
+            value: widget.progress,
             backgroundColor: Colors.white.withOpacity(0.05),
             color: const Color(0xFF10B981),
             minHeight: 12,
@@ -107,9 +174,9 @@ class ProposalDetailScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStat('Pour', '124'),
-              _buildStat('Contre', '42'),
-              _buildStat('Abstention', '12'),
+              _buildStat('Pour', widget.votesFor.toString()),
+              _buildStat('Contre', widget.votesAgainst.toString()),
+              _buildStat('Total', (widget.votesFor + widget.votesAgainst).toString()),
             ],
           )
         ],
@@ -127,16 +194,19 @@ class ProposalDetailScreen extends StatelessWidget {
   }
 
   Widget _buildAuditTrail() {
+    if (widget.votes.isEmpty) {
+      return const Center(child: Text('Aucun vote enregistré', style: TextStyle(color: Colors.white24)));
+    }
     return Column(
-      children: [
-        _buildAuditItem('0x7d8...12a9', 'Voté POUR', 'Il y a 5 min'),
-        _buildAuditItem('0x9f1...88c2', 'Voté CONTRE', 'Il y a 12 min'),
-        _buildAuditItem('0x2e3...f3a2', 'Voté POUR', 'Il y a 1h'),
-      ],
+      children: widget.votes.reversed.map((v) => _buildAuditItem(
+        v['txHash'] ?? '0x...',
+        'Voté ${v['vote'] == 'for' ? 'POUR' : 'CONTRE'}',
+        v['memberId'] ?? 'Inconnu'
+      )).toList(),
     );
   }
 
-  Widget _buildAuditItem(String hash, String action, String time) {
+  Widget _buildAuditItem(String hash, String action, String user) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -147,14 +217,16 @@ class ProposalDetailScreen extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(hash, style: const TextStyle(color: Color(0xFF10B981), fontFamily: 'monospace', fontSize: 12)),
-              Text(action, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(hash, style: const TextStyle(color: Color(0xFF10B981), fontFamily: 'monospace', fontSize: 10), overflow: TextOverflow.ellipsis),
+                Text(action, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
-          Text(time, style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10)),
+          Text(user, style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );

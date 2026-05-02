@@ -99,11 +99,72 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 _buildTransactionList(txs, snapshot.connectionState == ConnectionState.waiting),
                 const SizedBox(height: 32),
+                _buildSectionTitle('Top Contributeurs'),
+                const SizedBox(height: 16),
+                _buildReputationRanking(apiService),
+                const SizedBox(height: 32),
               ],
             ),
           );
         }
       ),
+    );
+  }
+
+  Widget _buildReputationRanking(ApiService api) {
+    return FutureBuilder<List<dynamic>>(
+      future: api.getProposals(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        
+        final proposals = snapshot.data!;
+        final Map<String, int> memberVotes = {};
+        for (var p in proposals) {
+          final votes = p['votes'] as List<dynamic>? ?? [];
+          for (var v in votes) {
+            final name = v['memberId'] ?? 'Anonyme';
+            memberVotes[name] = (memberVotes[name] ?? 0) + 1;
+          }
+        }
+        
+        final sorted = memberVotes.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+        final top = sorted.take(3).toList();
+
+        if (top.isEmpty) return const Text('Aucune activité enregistrée', style: TextStyle(color: Colors.white24));
+
+        return Column(
+          children: top.asMap().entries.map((entry) {
+            final i = entry.key;
+            final name = entry.value.key;
+            final count = entry.value.value;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.02),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor: i == 0 ? const Color(0xFFFEF3C7) : Colors.white.withOpacity(0.1),
+                        child: Text('${i + 1}', style: TextStyle(color: i == 0 ? Colors.black : Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  Text('$count votes', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900, fontSize: 12)),
+                ],
+              ),
+            );
+          }).toList(),
+        );
+      }
     );
   }
 

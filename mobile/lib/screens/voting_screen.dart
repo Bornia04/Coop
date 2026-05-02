@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import 'proposal_detail_screen.dart';
@@ -93,12 +94,8 @@ class _VotingScreenState extends State<VotingScreen> {
                 padding: const EdgeInsets.only(bottom: 24.0),
                 child: _buildVoteCard(
                   context,
-                  p['id'].toString(),
-                  p['title'] ?? 'Sans titre',
-                  p['description'] ?? '',
+                  p,
                   progress,
-                  p['status'] == 'active',
-                  totalVotes,
                   auth.userId ?? 'anonymous',
                 ),
               );
@@ -130,16 +127,27 @@ class _VotingScreenState extends State<VotingScreen> {
     }
   }
 
-  Widget _buildVoteCard(BuildContext context, String id, String title, String desc, double progress, bool isActive, int totalVotes, String memberId) {
+  Widget _buildVoteCard(BuildContext context, Map<String, dynamic> p, double progress, String memberId) {
+    final String id = p['id'].toString();
+    final String title = p['title'] ?? 'Sans titre';
+    final String desc = p['description'] ?? '';
+    final bool isActive = p['status'] == 'active';
+    final int totalVotes = (p['votesFor'] ?? 0) + (p['votesAgainst'] ?? 0);
+
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => ProposalDetailScreen(
+            id: id,
             title: title,
             description: desc,
             progress: progress,
             isActive: isActive,
+            expiresAt: p['expiresAt'] ?? '',
+            votesFor: p['votesFor'] ?? 0,
+            votesAgainst: p['votesAgainst'] ?? 0,
+            votes: p['votes'] ?? [],
           ),
         ),
       ),
@@ -165,14 +173,24 @@ class _VotingScreenState extends State<VotingScreen> {
                     color: isActive ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(100),
                   ),
-                  child: Text(
-                    isActive ? 'ACTIF' : 'TERMINÉ',
-                    style: TextStyle(
-                      color: isActive ? const Color(0xFF34D399) : Colors.white54,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 10,
-                      letterSpacing: 1,
-                    ),
+                  child: Row(
+                    children: [
+                      Text(
+                        isActive ? 'ACTIF' : 'TERMINÉ',
+                        style: TextStyle(
+                          color: isActive ? const Color(0xFF34D399) : Colors.white54,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 10,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      if (isActive && p['expiresAt'] != null) ...[
+                        const SizedBox(width: 8),
+                        const Icon(Icons.timer_outlined, color: Colors.redAccent, size: 12),
+                        const SizedBox(width: 4),
+                        _CountdownWidget(expiresAt: p['expiresAt']),
+                      ]
+                    ],
                   ),
                 ),
                 const Icon(Icons.verified_user_outlined, color: Color(0xFF10B981), size: 20),
@@ -243,6 +261,54 @@ class _VotingScreenState extends State<VotingScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _CountdownWidget extends StatefulWidget {
+  final String expiresAt;
+  const _CountdownWidget({required this.expiresAt});
+
+  @override
+  State<_CountdownWidget> createState() => _CountdownWidgetState();
+}
+
+class _CountdownWidgetState extends State<_CountdownWidget> {
+  late Timer _timer;
+  String _timeLeft = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final now = DateTime.now();
+      final end = DateTime.parse(widget.expiresAt);
+      final diff = end.difference(now);
+
+      if (diff.isNegative) {
+        if (mounted) setState(() => _timeLeft = 'EXPIRÉ');
+        timer.cancel();
+      } else {
+        if (mounted) setState(() => _timeLeft = '${diff.inMinutes}:${(diff.inSeconds % 60).toString().padLeft(2, '0')}');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      _timeLeft,
+      style: const TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold),
     );
   }
 }

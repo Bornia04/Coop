@@ -2,19 +2,54 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { type Proposal } from '@/lib/db';
-import { IconShield } from '@/components/Icons';
+import { IconShield, IconClock } from '@/components/Icons';
+
+function CountdownTimer({ expiresAt, onEnd }: { expiresAt: string; onEnd: () => void }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const end = new Date(expiresAt).getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        setTimeLeft('EXPIRÉ');
+        onEnd();
+        clearInterval(timer);
+      } else {
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft(`${mins}:${secs < 10 ? '0' : ''}${secs}`);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [expiresAt, onEnd]);
+
+  return (
+    <span style={{ color: '#EF4444', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+      <IconClock size={12} /> {timeLeft}
+    </span>
+  );
+}
 
 export default function Proposals() {
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchProposals = () => {
     fetch('/api/proposals')
       .then(res => res.json())
       .then(data => {
         setProposals(data);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchProposals();
+    const interval = setInterval(fetchProposals, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#059669', fontWeight: 800 }}>Chargement de la Gouvernance...</div>;
@@ -49,17 +84,20 @@ export default function Proposals() {
               overflow: 'hidden'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <span style={{ 
-                  background: isActive ? '#DCFCE7' : '#F1F5F9', 
-                  color: isActive ? '#059669' : '#64748B', 
-                  padding: '0.5rem 1.2rem', 
-                  borderRadius: '100px', 
-                  fontSize: '0.8rem', 
-                  fontWeight: 900,
-                  letterSpacing: '0.05em'
-                }}>
-                  {v.status.toUpperCase()}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                  <span style={{ 
+                    background: isActive ? '#DCFCE7' : (v.status === 'approved' ? '#DCFCE7' : '#FEF2F2'), 
+                    color: isActive ? '#059669' : (v.status === 'approved' ? '#059669' : '#EF4444'), 
+                    padding: '0.5rem 1.2rem', 
+                    borderRadius: '100px', 
+                    fontSize: '0.8rem', 
+                    fontWeight: 900,
+                    letterSpacing: '0.05em'
+                  }}>
+                    {v.status.toUpperCase()}
+                  </span>
+                  {isActive && <CountdownTimer expiresAt={v.expiresAt} onEnd={fetchProposals} />}
+                </div>
                 <IconShield size={24} color={isActive ? '#059669' : '#94A3B8'} />
               </div>
 
@@ -71,7 +109,7 @@ export default function Proposals() {
                   <span style={{ color: '#0F172A' }}>{pct}% POUR</span>
                 </div>
                 <div style={{ height: '10px', background: '#F1F5F9', borderRadius: '100px', overflow: 'hidden' }}>
-                  <div style={{ width: `${pct}%`, height: '100%', background: isActive ? '#059669' : '#2563EB', borderRadius: '100px' }}></div>
+                  <div style={{ width: `${pct}%`, height: '100%', background: isActive ? '#059669' : (v.status === 'approved' ? '#059669' : '#EF4444'), borderRadius: '100px' }}></div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8' }}>
                   <span>{total} MEMBRES ONT VOTÉ</span>

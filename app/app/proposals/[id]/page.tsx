@@ -1,33 +1,68 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { type Proposal } from '@/lib/db';
 import { generateTxHash } from '@/lib/blockchain';
-import { IconShield, IconCheck, IconX } from '@/components/Icons';
+import { IconShield, IconCheck, IconX, IconClock, IconBell } from '@/components/Icons';
 
 export default function ProposalDetail() {
   const { id } = useParams<{ id: string }>();
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  const prevVotesCount = useRef<number>(0);
 
   const fetchProposal = () => {
     fetch('/api/proposals')
       .then(res => res.json())
       .then(data => {
-        setProposal(data.find((p: Proposal) => p.id === id));
+        const found = data.find((p: Proposal) => p.id === id);
+        if (found) {
+          // Détection de nouveau vote pour notification
+          if (prevVotesCount.current > 0 && found.votes.length > prevVotesCount.current) {
+            setNotification(`Nouveau vote scellé par ${found.votes[found.votes.length - 1].memberId} !`);
+            setTimeout(() => setNotification(null), 5000);
+          }
+          prevVotesCount.current = found.votes.length;
+          setProposal(found);
+        }
         setLoading(false);
       });
   };
 
   useEffect(() => {
     fetchProposal();
-    const interval = setInterval(fetchProposal, 3000); // Real-time polling
+    const interval = setInterval(fetchProposal, 3000); 
     return () => clearInterval(interval);
   }, [id]);
+
+  // Timer logic
+  useEffect(() => {
+    if (!proposal || proposal.status !== 'active') return;
+
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const end = new Date(proposal.expiresAt).getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        setTimeLeft('EXPIRÉ');
+        fetchProposal();
+        clearInterval(timer);
+      } else {
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft(`${mins}:${secs < 10 ? '0' : ''}${secs}`);
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [proposal]);
 
   const handleVote = async (vote: 'for' | 'against') => {
     setVoting(true);
@@ -45,14 +80,14 @@ export default function ProposalDetail() {
     });
     
     if (!response.ok) {
-      setError('Vous avez déjà voté ou le vote est clos.');
+      setError('Impossible de voter (Deadline expirée ou déjà voté).');
     } else {
       fetchProposal();
     }
     setVoting(false);
   };
 
-  if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#059669', fontWeight: 800 }}>Synchronisation avec la blockchain...</div>;
+  if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#059669', fontWeight: 800 }}>Synchronisation Blockchain...</div>;
   if (!proposal) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#EF4444', fontWeight: 800 }}>Proposition introuvable.</div>;
 
   const total = proposal.votesFor + proposal.votesAgainst;
@@ -62,6 +97,14 @@ export default function ProposalDetail() {
   return (
     <div style={{ padding: '1rem 0' }}>
       
+      {/* Toast Notification */}
+      {notification && (
+        <div style={{ position: 'fixed', top: '2rem', right: '2rem', background: '#059669', color: 'white', padding: '1rem 2rem', borderRadius: '16px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', display: 'flex', alignItems: 'center', gap: '1rem', zIndex: 1000, animation: 'slideIn 0.3s ease-out' }}>
+          <IconBell size={20} />
+          <span style={{ fontWeight: 800 }}>{notification}</span>
+        </div>
+      )}
+
       <div style={{ marginBottom: '2.5rem' }}>
         <Link href="/app/proposals" style={{ color: '#64748B', fontWeight: 800, fontSize: '0.95rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           ← Retour à la Gouvernance
@@ -73,8 +116,15 @@ export default function ProposalDetail() {
         <div>
           <div style={{ background: 'white', padding: '3.5rem', borderRadius: '40px', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', border: '1px solid #F1F5F9' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-              <span style={{ background: '#DCFCE7', color: '#059669', padding: '0.5rem 1.2rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.05em' }}>PROPOSITION OFFICIELLE</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: isActive ? '#059669' : '#2563EB', color: 'white', padding: '0.5rem 1.5rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900 }}>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <span style={{ background: '#DCFCE7', color: '#059669', padding: '0.5rem 1.2rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900, letterSpacing: '0.05em' }}>PROPOSITION OFFICIELLE</span>
+                {isActive && (
+                  <span style={{ background: '#FEF2F2', color: '#EF4444', padding: '0.5rem 1.2rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <IconClock size={14} /> CLÔTURE DANS {timeLeft}
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', background: isActive ? '#059669' : (proposal.status === 'approved' ? '#059669' : '#EF4444'), color: 'white', padding: '0.5rem 1.5rem', borderRadius: '100px', fontSize: '0.8rem', fontWeight: 900 }}>
                  <IconShield size={16} /> {proposal.status.toUpperCase()}
               </div>
             </div>
@@ -99,7 +149,7 @@ export default function ProposalDetail() {
              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {proposal.votes.length === 0 ? (
                   <p style={{ textAlign: 'center', padding: '3rem', color: '#94A3B8', fontWeight: 600 }}>Aucun vote n'a encore été scellé pour cette proposition.</p>
-                ) : proposal.votes.map((v, i) => (
+                ) : [...proposal.votes].reverse().map((v, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.2rem', background: '#F8FAFC', borderRadius: '16px' }}>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                        <div style={{ width: '40px', height: '40px', background: '#E2E8F0', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, color: '#64748B' }}>
@@ -202,14 +252,20 @@ export default function ProposalDetail() {
              </div>
              <h4 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem' }}>Vérification Blockchain</h4>
              <p style={{ opacity: 0.6, fontSize: '0.9rem', lineHeight: 1.6 }}>
-               Chaque vote est unique et protégé par votre clé cryptographique. Une fois émis, il est impossible de le modifier ou de le supprimer du registre.
+                Chaque vote est unique et protégé par votre clé cryptographique. Une fois émis, il est impossible de le modifier ou de le supprimer du registre.
              </p>
            </div>
 
         </div>
 
       </div>
+      
+      <style jsx>{`
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }
-

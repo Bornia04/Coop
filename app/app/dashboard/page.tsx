@@ -9,7 +9,6 @@ export default function Dashboard() {
   const [generating, setGenerating] = useState(false);
   const [showPdfModal, setShowPdfModal] = useState(false);
 
-
   useEffect(() => {
     fetch('/api/transactions')
       .then(res => res.json())
@@ -22,10 +21,8 @@ export default function Dashboard() {
   const handleGeneratePDF = async () => {
     setShowPdfModal(false);
     setGenerating(true);
-    // Simulation d'une génération de rapport complexe
     await new Promise(r => setTimeout(r, 2500));
     
-    // Création d'un certificat HTML professionnel
     const htmlContent = `
       <html>
         <head>
@@ -61,7 +58,7 @@ export default function Dashboard() {
           </div>
           <div class="footer">
             © 2024 CoopLedger - La terre produit, la Blockchain certifie, la communauté grandit.<br>
-            Empreinte Cryptographique: ${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}
+            Empreinte Cryptographique: ${Math.random().toString(36).substring(2, 15)}
           </div>
         </body>
       </html>
@@ -74,12 +71,38 @@ export default function Dashboard() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
     setGenerating(false);
-    alert('Le Certificat d\'Audit a été généré et téléchargé avec succès.');
   };
 
+  // Calcul de l'évolution de la trésorerie pour le graphique
+  const sortedTxs = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  let runningBalance = 0;
+  const historyData = sortedTxs.map(t => {
+    runningBalance += (t.type === 'credit' ? t.amount : -t.amount);
+    return { date: t.date, balance: runningBalance };
+  }).slice(-10);
 
+  const maxBalance = Math.max(...historyData.map(d => d.balance), 1);
+  const minBalance = Math.min(...historyData.map(d => d.balance), 0);
+  const range = maxBalance - minBalance || 1;
+
+  // Calcul du Top des membres (Réputation)
+  const [proposals, setProposals] = useState<any[]>([]);
+  useEffect(() => {
+    fetch('/api/proposals')
+      .then(res => res.json())
+      .then(data => setProposals(data));
+  }, []);
+
+  const memberVotes: Record<string, number> = {};
+  proposals.forEach(p => {
+    if (p.votes) {
+      p.votes.forEach((v: any) => {
+        memberVotes[v.memberId] = (memberVotes[v.memberId] || 0) + 1;
+      });
+    }
+  });
+  const topMembers = Object.entries(memberVotes).sort((a, b) => b[1] - a[1]).slice(0, 4);
 
   if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#059669', fontWeight: 800 }}>Synchronisation Blockchain...</div>;
 
@@ -89,7 +112,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ padding: '1rem 0' }}>
-      
       {generating && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.95)', zIndex: 10000, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
           <div style={{ width: '80px', height: '80px', border: '6px solid #10B981', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '2rem' }}></div>
@@ -123,16 +145,9 @@ export default function Dashboard() {
                       <p style={{ fontWeight: 800 }}>{transactions.length}</p>
                    </div>
                 </div>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                   <input type="checkbox" checked readOnly style={{ width: '20px', height: '20px' }} />
-                   <p style={{ fontSize: '0.9rem', fontWeight: 600 }}>Inclure les preuves de scellage blockchain (TxHash)</p>
-                </div>
              </div>
 
-             <button 
-                onClick={handleGeneratePDF}
-                style={{ width: '100%', background: '#0F172A', color: 'white', padding: '1.2rem', borderRadius: '16px', border: 'none', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer' }}
-             >
+             <button onClick={handleGeneratePDF} style={{ width: '100%', background: '#0F172A', color: 'white', padding: '1.2rem', borderRadius: '16px', border: 'none', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer' }}>
                 Générer et Sceller le Rapport
              </button>
           </div>
@@ -145,200 +160,85 @@ export default function Dashboard() {
           <p style={{ color: '#64748B', fontSize: '1.1rem', marginTop: '0.4rem' }}>Surveillance du Ledger Public et de la Gouvernance de la Coopérative</p>
         </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          {localStorage.getItem('user_role') === 'ADMIN' && (
-            <button 
-              onClick={async () => {
-                const { getStore, addTransaction } = await import('@/lib/store');
-                const store = getStore();
-                addTransaction(store, "Vente Café - Demo Live", 150000, "credit", "Ventes");
-                window.location.reload();
-              }}
-              style={{ padding: '0.8rem 1.5rem', borderRadius: '12px', border: 'none', background: '#10B981', color: 'white', fontWeight: 900, cursor: 'pointer', boxShadow: '0 5px 15px rgba(16, 185, 129, 0.3)' }}
-            >
-              ⚡ Demo Live (Ajout)
-            </button>
-          )}
-          <button 
-            onClick={() => setShowPdfModal(true)}
-            style={{ padding: '0.8rem 1.5rem', borderRadius: '12px', border: '1px solid #E2E8F0', background: 'white', color: '#0F172A', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
+          <button onClick={() => setShowPdfModal(true)} style={{ padding: '0.8rem 1.5rem', borderRadius: '12px', border: '1px solid #E2E8F0', background: 'white', color: '#0F172A', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             📥 Rapport PDF
           </button>
-          <button style={{ padding: '0.8rem 1.5rem', borderRadius: '12px', border: 'none', background: '#0F172A', color: 'white', fontWeight: 700, cursor: 'pointer' }}>📅 Ce Trimestre</button>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
-        
-        {/* Main Balance Card */}
-        <div style={{ 
-          background: 'linear-gradient(135deg, #064E3B 0%, #022C22 100%)', 
-          borderRadius: '32px', 
-          padding: '3rem', 
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-          boxShadow: '0 20px 40px -10px rgba(6, 78, 59, 0.3)'
-        }}>
-          <div style={{ position: 'absolute', top: '-20%', right: '-10%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, rgba(255,255,255,0) 70%)', borderRadius: '50%' }} />
-          
+        <div style={{ background: 'linear-gradient(135deg, #064E3B 0%, #022C22 100%)', borderRadius: '32px', padding: '3rem', color: 'white', position: 'relative', overflow: 'hidden', boxShadow: '0 20px 40px -10px rgba(6, 78, 59, 0.3)' }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', opacity: 0.3 }}>
+             <svg width="100%" height="100%" viewBox="0 0 100 20" preserveAspectRatio="none">
+                <path d={`M 0 20 ${historyData.map((d, i) => `L ${(i / (historyData.length - 1)) * 100} ${20 - ((d.balance - minBalance) / range) * 15}`).join(' ')} L 100 20 Z`} fill="url(#grad)" />
+                <defs><linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style={{ stopColor: '#10B981', stopOpacity: 0.8 }} /><stop offset="100%" style={{ stopColor: '#10B981', stopOpacity: 0 }} /></linearGradient></defs>
+                <path d={`M 0 ${20 - ((historyData[0].balance - minBalance) / range) * 15} ${historyData.map((d, i) => `L ${(i / (historyData.length - 1)) * 100} ${20 - ((d.balance - minBalance) / range) * 15}`).join(' ')}`} fill="none" stroke="#10B981" strokeWidth="0.5" />
+             </svg>
+          </div>
           <div style={{ position: 'relative', zIndex: 1 }}>
             <p style={{ fontSize: '0.9rem', fontWeight: 800, opacity: 0.6, letterSpacing: '0.1em' }}>CAPITAL TOTAL DISPONIBLE</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '1.5rem', marginTop: '1rem' }}>
               <h2 style={{ fontSize: '4.5rem', fontWeight: 900 }}>{balance.toLocaleString()} <span style={{ fontSize: '1.5rem', opacity: 0.6 }}>FCFA</span></h2>
-              <div style={{ background: '#059669', color: 'white', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 800 }}>📈 +14.2%</div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3rem', marginTop: '4rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '3rem' }}>
-              <Link href="/app/transactions" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <p style={{ fontSize: '0.8rem', fontWeight: 700, opacity: 0.5, marginBottom: '0.5rem' }}>TOTAL REVENUS</p>
-                <p style={{ fontSize: '1.6rem', fontWeight: 800 }}>{totalRevenue.toLocaleString()} <span style={{ fontSize: '0.9rem', opacity: 0.5 }}>FCFA</span></p>
-              </Link>
-              <Link href="/app/depenses" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <p style={{ fontSize: '0.8rem', fontWeight: 700, opacity: 0.5, marginBottom: '0.5rem' }}>TOTAL DÉPENSES</p>
-                <p style={{ fontSize: '1.6rem', fontWeight: 800 }}>{totalExpenses.toLocaleString()} <span style={{ fontSize: '0.9rem', opacity: 0.5 }}>FCFA</span></p>
-              </Link>
-              <Link href="/app/transactions" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <p style={{ fontSize: '0.8rem', fontWeight: 700, opacity: 0.5, marginBottom: '0.5rem' }}>SÉCURITÉ LEDGER</p>
-                <p style={{ fontSize: '1.6rem', fontWeight: 800, color: '#10B981' }}>100% OK</p>
-              </Link>
+              <div style={{ background: '#059669', color: 'white', padding: '0.5rem 1rem', borderRadius: '100px', fontSize: '0.9rem', fontWeight: 800 }}>📈 Stable</div>
             </div>
           </div>
         </div>
 
-        {/* Expenses Distribution */}
-        <Link href="/app/depenses" style={{ textDecoration: 'none', color: 'inherit', background: 'white', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', display: 'block' }}>
-          <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0F172A', marginBottom: '2rem' }}>Répartition Dépenses</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '180px' }}>
-             <div style={{ position: 'relative', width: '160px', height: '160px' }}>
-                <svg viewBox="0 0 36 36" style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}>
-                  <circle cx="18" cy="18" r="16" fill="none" stroke="#F1F5F9" strokeWidth="3" />
-                  <circle cx="18" cy="18" r="16" fill="none" stroke="#059669" strokeWidth="4" strokeDasharray="65 100" />
-                  <circle cx="18" cy="18" r="16" fill="none" stroke="#2563EB" strokeWidth="4" strokeDasharray="25 100" strokeDashoffset="-65" />
-                </svg>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                  <p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#0F172A' }}>72%</p>
-                  <p style={{ fontSize: '0.6rem', color: '#64748B', fontWeight: 700 }}>MATÉRIEL</p>
-                </div>
+        <div style={{ background: 'white', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0F172A', marginBottom: '2rem' }}>Évolution Trésorerie</h3>
+          <div style={{ flex: 1, position: 'relative', minHeight: '150px' }}>
+             <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80%', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '4px' }}>
+                {historyData.map((d, i) => (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '100%', height: `${((d.balance - minBalance) / range) * 100}%`, background: '#059669', borderRadius: '4px 4px 0 0', opacity: 0.2 + (i / historyData.length) * 0.8, minHeight: '4px' }} />
+                    <span style={{ fontSize: '0.6rem', color: '#94A3B8', fontWeight: 800 }}>{d.date.split('-')[2]}</span>
+                  </div>
+                ))}
              </div>
           </div>
-          <div style={{ marginTop: '2rem', display: 'grid', gap: '0.8rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <div style={{ width: '10px', height: '10px', background: '#059669', borderRadius: '3px' }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>Investissement Matériel</span>
-              </div>
-              <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>65%</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                <div style={{ width: '10px', height: '10px', background: '#2563EB', borderRadius: '3px' }} />
-                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569' }}>Frais Opérationnels</span>
-              </div>
-              <span style={{ fontWeight: 800, fontSize: '0.9rem' }}>25%</span>
-            </div>
-          </div>
-        </Link>
+        </div>
       </div>
 
-
-      {/* Recent Transactions Table */}
-      <div style={{ background: 'white', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', overflow: 'hidden', marginBottom: '3rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
-          <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A' }}>Derniers Enregistrements Ledger</h3>
-          <Link href="/app/transactions" style={{ color: '#059669', fontWeight: 800, textDecoration: 'none', fontSize: '0.95rem' }}>VOIR TOUT LE REGISTRE</Link>
-        </div>
-        
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
-                <th style={{ textAlign: 'left', padding: '1.2rem', color: '#64748B', fontWeight: 800, fontSize: '0.8rem' }}>DATE</th>
-                <th style={{ textAlign: 'left', padding: '1.2rem', color: '#64748B', fontWeight: 800, fontSize: '0.8rem' }}>DESCRIPTION</th>
-                <th style={{ textAlign: 'right', padding: '1.2rem', color: '#64748B', fontWeight: 800, fontSize: '0.8rem' }}>MONTANT</th>
-                <th style={{ textAlign: 'center', padding: '1.2rem', color: '#64748B', fontWeight: 800, fontSize: '0.8rem' }}>PREUVE BLOCKCHAIN</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transactions.slice(0, 4).map((t, i) => (
-                <tr key={i} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background 0.2s' }}>
-                  <td style={{ padding: '1.5rem', color: '#475569', fontSize: '0.95rem', fontWeight: 600 }}>{t.date}</td>
-                  <td style={{ padding: '1.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ 
-                        width: '40px', height: '40px', 
-                        background: t.type === 'credit' ? '#DCFCE7' : '#FEE2E2', 
-                        color: t.type === 'credit' ? '#059669' : '#DC2626',
-                        borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '1.2rem'
-                      }}>{t.type === 'credit' ? '↓' : '↑'}</div>
-                      <span style={{ fontWeight: 700, color: '#0F172A' }}>{t.description}</span>
-                    </div>
-                  </td>
-                  <td style={{ padding: '1.5rem', textAlign: 'right', fontWeight: 900, color: t.type === 'credit' ? '#059669' : '#DC2626' }}>
-                    {t.type === 'credit' ? '+' : '-'}{t.amount.toLocaleString()} <span style={{ fontSize: '0.7rem', opacity: 0.6 }}>FCFA</span>
-                  </td>
-                  <td style={{ padding: '1.5rem', textAlign: 'center' }}>
-                    <div style={{ 
-                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem', 
-                      background: '#F8FAFC', padding: '0.4rem 1rem', borderRadius: '100px', 
-                      border: '1px solid #E2E8F0', color: '#1E3A8A', fontSize: '0.75rem', fontWeight: 800
-                    }}>
-                      <IconShield size={12} /> SCELLÉ
-                    </div>
-                  </td>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+        <div style={{ background: 'white', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+          <h3 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0F172A', marginBottom: '2rem' }}>Derniers Enregistrements</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <th style={{ textAlign: 'left', padding: '1rem', color: '#64748B', fontSize: '0.8rem' }}>DATE</th>
+                  <th style={{ textAlign: 'left', padding: '1rem', color: '#64748B', fontSize: '0.8rem' }}>DESCRIPTION</th>
+                  <th style={{ textAlign: 'right', padding: '1rem', color: '#64748B', fontSize: '0.8rem' }}>MONTANT</th>
                 </tr>
+              </thead>
+              <tbody>
+                {transactions.slice(0, 5).map((t, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '1rem', color: '#475569', fontSize: '0.9rem' }}>{t.date}</td>
+                    <td style={{ padding: '1rem', fontWeight: 700, color: '#0F172A' }}>{t.description}</td>
+                    <td style={{ padding: '1rem', textAlign: 'right', fontWeight: 900, color: t.type === 'credit' ? '#059669' : '#DC2626' }}>{t.type === 'credit' ? '+' : '-'}{t.amount.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={{ background: 'white', borderRadius: '32px', padding: '2.5rem', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)' }}>
+           <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0F172A', marginBottom: '2rem' }}>Top Membres (Votes)</h3>
+           <div style={{ display: 'grid', gap: '1.2rem' }}>
+              {topMembers.map(([name, count], i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: '#F8FAFC', borderRadius: '16px' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <div style={{ width: '40px', height: '40px', background: i === 0 ? '#FEF3C7' : '#E2E8F0', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{i === 0 ? '🏆' : '👤'}</div>
+                      <p style={{ fontWeight: 800, color: '#0F172A' }}>{name}</p>
+                   </div>
+                   <div style={{ textAlign: 'right' }}><p style={{ fontWeight: 900, color: '#059669' }}>{count}</p></div>
+                </div>
               ))}
-            </tbody>
-          </table>
+           </div>
         </div>
       </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem' }}>
-        <div style={{ background: '#0F172A', borderRadius: '40px', padding: '4rem', color: 'white', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', background: 'var(--ve-gold)', borderRadius: '50%', opacity: 0.05 }}></div>
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <h4 style={{ color: 'var(--ve-gold)', fontSize: '0.9rem', fontWeight: 900, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>Notre Vision</h4>
-            <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem', lineHeight: 1.3 }}>
-              "La terre produit, la Blockchain certifie, la communauté grandit."
-            </h2>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
-              CoopLedger transforme chaque agriculteur en un acteur informé et souverain. Bâtissons ensemble le pont de la confiance.
-            </p>
-            <Link href="/a-propos" style={{ background: 'var(--ve-gold)', color: '#0F172A', padding: '1rem 2rem', borderRadius: '12px', fontWeight: 900, textDecoration: 'none', display: 'inline-block' }}>En savoir plus</Link>
-          </div>
-        </div>
-
-        <div style={{ background: 'white', borderRadius: '40px', padding: '3rem', border: '1px solid #F1F5F9', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)' }}>
-          <h4 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0F172A', marginBottom: '2rem' }}>Démocratie Agricole (DAO)</h4>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ padding: '1.5rem', background: '#F8FAFC', borderRadius: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <span style={{ fontWeight: 800 }}>Achat de nouveaux intrants</span>
-                <span style={{ color: '#059669', fontWeight: 900 }}>68% POUR</span>
-              </div>
-              <div style={{ height: '10px', background: '#E2E8F0', borderRadius: '100px', overflow: 'hidden' }}>
-                <div style={{ width: '68%', height: '100%', background: '#059669' }}></div>
-              </div>
-            </div>
-            <div style={{ padding: '1.5rem', background: '#F8FAFC', borderRadius: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                <span style={{ fontWeight: 800 }}>Extension du hangar stockage</span>
-                <span style={{ color: '#64748B', fontWeight: 900 }}>EN ATTENTE</span>
-              </div>
-              <div style={{ height: '10px', background: '#E2E8F0', borderRadius: '100px', overflow: 'hidden' }}>
-                <div style={{ width: '42%', height: '100%', background: '#94A3B8' }}></div>
-              </div>
-            </div>
-          </div>
-          <Link href="/app/proposals" style={{ display: 'block', width: '100%', marginTop: '2rem', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: 'white', fontWeight: 800, color: '#0F172A', cursor: 'pointer', textAlign: 'center', textDecoration: 'none' }}>
-            Participer à la Gouvernance
-          </Link>
-        </div>
-      </div>
-
-
     </div>
   );
 }
-

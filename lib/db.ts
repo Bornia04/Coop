@@ -21,64 +21,65 @@ export interface Proposal {
   category: string;
   createdBy: string;
   createdAt: string;
+  expiresAt: string; // ISO String
   status: 'active' | 'approved' | 'rejected';
   votesFor: number;
   votesAgainst: number;
   votes: { memberId: string; vote: 'for' | 'against'; txHash: string }[];
   txHash?: string;
+  blockNumber?: number;
 }
 
 const INITIAL_DATA = {
   transactions: [
-    { id: '1', date: '2023-10-24', description: "Achat d'engrais organique", amount: 1245000, type: 'debit', category: 'Engrais', txHash: '0x8F2e9...4C2' },
-    { id: '2', date: '2023-10-22', description: "Vente récolte maïs (Bénin)", amount: 8210000, type: 'credit', category: 'Ventes', txHash: '0x3D1a4...9A4' },
-    { id: '3', date: '2023-10-20', description: "Location tracteur Kubota", amount: 350000, type: 'debit', category: 'Matériel', txHash: '0x9E3b1...1B7' },
-    { id: '4', date: '2023-10-18', description: "Subvention d'État - Plan Vert", amount: 5000000, type: 'credit', category: 'Subventions', txHash: '0x2A4c8...8C5' },
-    { id: '5', date: '2023-10-15', description: "Maintenance système d'irrigation", amount: 150000, type: 'debit', category: 'Infrastructure', txHash: '0x1F5d7...7D6' },
-    { id: '6', date: '2023-10-12', description: "Vente Cacao - Exportation Europe", amount: 12500000, type: 'credit', category: 'Ventes', txHash: '0x7C2e1...3B2' },
-    { id: '7', date: '2023-10-10', description: "Salaire journaliers - Récolte", amount: 850000, type: 'debit', category: 'Main d\'œuvre', txHash: '0x4D3a2...1E5' },
-    { id: '8', date: '2023-10-08', description: "Achat semences de soja", amount: 450000, type: 'debit', category: 'Semences', txHash: '0x6A1b9...9F4' }
+    { id: 'tx_20', date: '2024-04-10', description: "Vente Riz - Coopérative de la Vallée", amount: 4200000, type: 'credit', category: 'Ventes', txHash: '0xBC_RIZ_2024_001' },
+    { id: 'tx_19', date: '2024-04-05', description: "Achat Système de Pompage Solaire", amount: 2800000, type: 'debit', category: 'Infrastructure', txHash: '0xBC_SOLAR_PUMP_2024' },
+    { id: 'tx_18', date: '2024-03-25', description: "Exportation Ananas - Marché Européen", amount: 9500000, type: 'credit', category: 'Ventes', txHash: '0xBC_ANANAS_EXPORT_2024' },
+    { id: 'tx_17', date: '2024-03-15', description: "Formation technique - Agriculture Digitale", amount: 650000, type: 'debit', category: 'Formation', txHash: '0xBC_TRAINING_2024' },
+    { id: 'tx_16', date: '2024-03-01', description: "Vente groupée Coton - Récolte Hiver", amount: 15400000, type: 'credit', category: 'Ventes', txHash: '0xBlockchain_Coton_2024' },
+    { id: 'tx_15', date: '2024-02-15', description: "Achat moissonneuse batteuse occasion", amount: 8500000, type: 'debit', category: 'Matériel', txHash: '0xBlockchain_Moiss_2024' },
+    { id: 'tx_14', date: '2024-01-20', description: "Prime de performance - Exportation", amount: 2200000, type: 'credit', category: 'Ventes', txHash: '0xBlockchain_Prime_2024' },
+    { id: 'tx_13', date: '2023-12-10', description: "Frais de stockage - Entrepôt Central", amount: 450000, type: 'debit', category: 'Infrastructure', txHash: '0xBlockchain_Store_2023' },
+    { id: 'tx_12', date: '2023-11-25', description: "Vente Maïs - Marché Local", amount: 3800000, type: 'credit', category: 'Ventes', txHash: '0xBlockchain_Mais_2023' },
+    { id: 'tx_11', date: '2023-11-05', description: "Réparation tracteur John Deere #04", amount: 120000, type: 'debit', category: 'Maintenance', txHash: '0xBlockchain_Maint_2023' }
   ],
   proposals: [
     { 
-      id: 'p1', title: 'Expansion du parc photovoltaïque', description: 'Installer des panneaux solaires supplémentaires sur le hangar nord pour réduire les coûts énergétiques de la coopérative de 40%.', 
+      id: 'p5', title: 'Unité de transformation de manioc', description: 'Ajouter de la valeur à notre production en transformant le manioc en gari et tapioca sur place.', 
+      amount: 25000000, category: 'Infrastructure', createdBy: 'Président', createdAt: new Date().toISOString(), 
+      expiresAt: new Date(Date.now() + 10 * 24 * 3600000).toISOString(),
+      status: 'active', votesFor: 45, votesAgainst: 12, votes: [], txHash: '0xBlockchain_Manioc_Plan' 
+    },
+    { 
+      id: 'p1', title: 'Expansion du parc photovoltaïque', description: 'Installer des panneaux solaires supplémentaires sur le hangar nord pour réduire les coûts énergétiques.', 
       amount: 15000000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-01', 
+      expiresAt: new Date(Date.now() + 30 * 24 * 3600000).toISOString(),
       status: 'active', votesFor: 65, votesAgainst: 12, votes: [], txHash: '0x7d2f...1a9e' 
     },
     { 
-      id: 'p2', title: 'Achat groupé de tracteurs électriques', description: 'Renouveler la flotte de tracteurs avec des modèles électriques pour une agriculture plus verte et durable.', 
+      id: 'p2', title: 'Achat groupé de tracteurs électriques', description: 'Renouveler la flotte de tracteurs avec des modèles électriques pour une agriculture durable.', 
       amount: 45000000, category: 'Matériel', createdBy: 'Admin', createdAt: '2023-10-05', 
+      expiresAt: new Date(Date.now() + 15 * 24 * 3600000).toISOString(),
       status: 'active', votesFor: 42, votesAgainst: 40, votes: [], txHash: '0x3a1b...8c4d' 
-    },
-    { 
-      id: 'p3', title: 'Changement de prestataire logistique', description: 'Passer à un transporteur local pour la distribution de nos produits afin de favoriser l\'économie de proximité.', 
-      amount: 0, category: 'Logistique', createdBy: 'Admin', createdAt: '2023-09-15', 
-      status: 'approved', votesFor: 92, votesAgainst: 5, votes: [], txHash: '0x9e2c...3f1a' 
-    },
-    { 
-      id: 'p4', title: 'Nouveau forage pour le secteur Sud', description: 'Creuser un puits artésien pour sécuriser l\'accès à l\'eau pendant la saison sèche.', 
-      amount: 3500000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-20', 
-      status: 'active', votesFor: 128, votesAgainst: 2, votes: [], txHash: '0x1c4b...7d2e' 
     }
   ],
   equipment: [
-    { name: 'John Deere 8R #04', id: 'JD-2023-004', status: 'Opérationnel', color: '#10B981', date: '15 Oct 2023' },
-    { name: 'Moissonneuse Class #01', id: 'CL-2022-001', status: 'En Maintenance', color: '#F59E0B', date: '28 Oct 2023' },
-    { name: 'Tracteur Kubota #12', id: 'KB-2023-012', status: 'Opérationnel', color: '#10B981', date: '10 Sep 2023' },
-    { name: 'Drone Surveillance A1', id: 'DR-2024-001', status: 'Opérationnel', color: '#10B981', date: '01 Nov 2023' },
-    { name: 'Système Irrigation #08', id: 'IR-2021-008', status: 'Alerte Filtre', color: '#EF4444', date: '22 Oct 2023' }
+    { name: 'John Deere 8R #04', id: 'JD-2023-004', status: 'Opérationnel', color: '#10B981', date: '15 Apr 2024' },
+    { name: 'Moissonneuse Class #01', id: 'CL-2022-001', status: 'En Maintenance', color: '#F59E0B', date: '28 Apr 2024' },
+    { name: 'Tracteur Kubota #12', id: 'KB-2023-012', status: 'Opérationnel', color: '#10B981', date: '10 Mar 2024' },
+    { name: 'Drone Surveillance A1', id: 'DR-2024-001', status: 'Opérationnel', color: '#10B981', date: '01 May 2024' },
+    { name: 'Système Irrigation #08', id: 'IR-2021-008', status: 'Alerte Filtre', color: '#EF4444', date: '22 Apr 2024' }
   ],
   alerts: [
     { title: 'Vidange Requise', description: 'John Deere #08 — 450h dépassées', type: 'critical' },
-    { title: 'Contrôle Technique', description: 'Remorque Benne #02 — Échéance dans 3 jours', type: 'warning' },
-    { title: 'Changement Filtres', description: 'Système Irrigation Sud — Maintenance préventive', type: 'info' },
-    { title: 'Niveau d\'Huile Bas', description: 'Tracteur Kubota #05 — Vérifier niveau', type: 'warning' }
+    { title: 'Contrôle Technique', description: 'Camion Iveco #02 — Échéance dans 3 jours', type: 'warning' },
+    { title: 'Changement Filtres', description: 'Système Irrigation Sud — Maintenance préventive', type: 'info' }
   ],
   equipmentStats: [
-    { label: 'TRACTEURS', val: '12', icon: '🚜' },
+    { label: 'TRACTEURS', val: '14', icon: '🚜' },
     { label: 'MOISSONNEUSES', val: '4', icon: '🌾' },
-    { label: 'UTILITAIRES', val: '8', icon: '🛻' },
-    { label: 'OUTILS DIVERS', val: '45', icon: '🔧' }
+    { label: 'UTILITAIRES', val: '9', icon: '🛻' },
+    { label: 'OUTILS DIVERS', val: '52', icon: '🔧' }
   ]
 };
 
@@ -88,24 +89,48 @@ function readDB() {
     fs.mkdirSync(dir, { recursive: true });
   }
 
+  let db: any;
   if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(INITIAL_DATA, null, 2));
-    return INITIAL_DATA;
+    db = INITIAL_DATA;
+  } else {
+    const content = fs.readFileSync(DB_PATH, 'utf-8');
+    if (!content || content.trim() === '') {
+      db = INITIAL_DATA;
+    } else {
+      try {
+        db = JSON.parse(content);
+      } catch (e) {
+        db = INITIAL_DATA;
+      }
+    }
   }
 
-  const content = fs.readFileSync(DB_PATH, 'utf-8');
-  if (!content || content.trim() === '') {
-    fs.writeFileSync(DB_PATH, JSON.stringify(INITIAL_DATA, null, 2));
-    return INITIAL_DATA;
+  // Auto-conclusion des votes expriés
+  let changed = false;
+  const now = new Date();
+  db.proposals.forEach((p: Proposal) => {
+    if (p.status === 'active' && p.expiresAt && new Date(p.expiresAt) < now) {
+      p.status = p.votesFor >= p.votesAgainst ? 'approved' : 'rejected';
+      changed = true;
+      
+      // Enregistrer la clôture dans le Ledger
+      db.transactions.unshift({
+        id: 'close_' + Date.now(),
+        date: now.toISOString().split('T')[0],
+        description: `CLÔTURE DÉCISIONNELLE: ${p.title} (${p.status.toUpperCase()})`,
+        amount: 0,
+        type: 'credit',
+        category: 'Gouvernance',
+        txHash: '0xSYSTEM_CLOSE_' + p.id
+      });
+    }
+  });
+
+  if (changed || !fs.existsSync(DB_PATH)) {
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
   }
 
-  try {
-    return JSON.parse(content);
-  } catch (e) {
-    console.error('Database corruption detected, resetting to initial data.');
-    fs.writeFileSync(DB_PATH, JSON.stringify(INITIAL_DATA, null, 2));
-    return INITIAL_DATA;
-  }
+  return db;
 }
 
 function writeDB(data: any) {
@@ -124,9 +149,24 @@ export const addTransaction = (tx: Transaction) => {
   writeDB(db);
 };
 
-export const addProposal = (p: Proposal) => {
+export const addProposal = (p: Partial<Proposal>) => {
   const db = readDB();
-  db.proposals.unshift(p);
+  const fullProposal: Proposal = {
+    id: p.id || 'p' + Date.now(),
+    title: p.title || '',
+    description: p.description || '',
+    amount: p.amount || 0,
+    category: p.category || 'Général',
+    createdBy: p.createdBy || 'Anonyme',
+    createdAt: new Date().toISOString(),
+    expiresAt: p.expiresAt || new Date(Date.now() + 4 * 60000).toISOString(), // 4 min par défaut
+    status: 'active',
+    votesFor: 0,
+    votesAgainst: 0,
+    votes: [],
+    ...p
+  };
+  db.proposals.unshift(fullProposal);
   writeDB(db);
 };
 
@@ -135,6 +175,11 @@ export const castVote = (proposalId: string, vote: 'for' | 'against', memberId: 
   const p = db.proposals.find((x: any) => x.id === proposalId);
   
   if (!p || p.status !== 'active') return false;
+
+  // Vérifier deadline
+  if (new Date(p.expiresAt) < new Date()) {
+    return false;
+  }
 
   // 1. Limiter à 1 vote par personne
   const alreadyVoted = p.votes.some((v: any) => v.memberId === memberId);
@@ -146,9 +191,9 @@ export const castVote = (proposalId: string, vote: 'for' | 'against', memberId: 
   
   p.votes.push({ memberId, vote, txHash });
 
-  // 3. Logique de conclusion (Exemple: Se termine à 100 votes ou si une majorité est claire)
+  // 3. Logique de conclusion immédiate si quorum atteint (optionnel)
   const totalVotes = p.votesFor + p.votesAgainst;
-  if (totalVotes >= 150) { // Seuil de conclusion arbitraire pour la démo
+  if (totalVotes >= 150) { 
     p.status = p.votesFor > p.votesAgainst ? 'approved' : 'rejected';
   }
 
