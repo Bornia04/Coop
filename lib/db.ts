@@ -29,39 +29,49 @@ export interface Proposal {
 
 const INITIAL_DATA = {
   transactions: [
-    { id: '1', date: '2023-10-24', description: "Achat d'engrais organique", amount: 1245000, type: 'debit', category: 'Engrais', txHash: '0x8F2...4C2' },
-    { id: '2', date: '2023-10-22', description: "Vente récolte maïs", amount: 8210000, type: 'credit', category: 'Ventes', txHash: '0x3D1...9A4' },
-    { id: '3', date: '2023-10-20', description: "Location tracteur", amount: 350000, type: 'debit', category: 'Matériel', txHash: '0x9E3...1B7' },
-    { id: '4', date: '2023-10-18', description: "Subvention d'État", amount: 5000000, type: 'credit', category: 'Subventions', txHash: '0x2A4...8C5' },
-    { id: '5', date: '2023-10-15', description: "Maintenance système d'irrigation", amount: 150000, type: 'debit', category: 'Infrastructure', txHash: '0x1F5...7D6' }
+    { id: '1', date: '2023-10-24', description: "Achat d'engrais organique", amount: 1245000, type: 'debit', category: 'Engrais', txHash: '0x8F2e9...4C2' },
+    { id: '2', date: '2023-10-22', description: "Vente récolte maïs (Bénin)", amount: 8210000, type: 'credit', category: 'Ventes', txHash: '0x3D1a4...9A4' },
+    { id: '3', date: '2023-10-20', description: "Location tracteur Kubota", amount: 350000, type: 'debit', category: 'Matériel', txHash: '0x9E3b1...1B7' },
+    { id: '4', date: '2023-10-18', description: "Subvention d'État - Plan Vert", amount: 5000000, type: 'credit', category: 'Subventions', txHash: '0x2A4c8...8C5' },
+    { id: '5', date: '2023-10-15', description: "Maintenance système d'irrigation", amount: 150000, type: 'debit', category: 'Infrastructure', txHash: '0x1F5d7...7D6' },
+    { id: '6', date: '2023-10-12', description: "Vente Cacao - Exportation Europe", amount: 12500000, type: 'credit', category: 'Ventes', txHash: '0x7C2e1...3B2' },
+    { id: '7', date: '2023-10-10', description: "Salaire journaliers - Récolte", amount: 850000, type: 'debit', category: 'Main d\'œuvre', txHash: '0x4D3a2...1E5' },
+    { id: '8', date: '2023-10-08', description: "Achat semences de soja", amount: 450000, type: 'debit', category: 'Semences', txHash: '0x6A1b9...9F4' }
   ],
   proposals: [
     { 
-      id: 'p1', title: 'Expansion du parc photovoltaïque', description: 'Installer des panneaux solaires supplémentaires sur le hangar nord pour réduire les coûts énergétiques de la coopérative.', 
+      id: 'p1', title: 'Expansion du parc photovoltaïque', description: 'Installer des panneaux solaires supplémentaires sur le hangar nord pour réduire les coûts énergétiques de la coopérative de 40%.', 
       amount: 15000000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-01', 
-      status: 'active', votesFor: 12, votesAgainst: 3, votes: [] 
+      status: 'active', votesFor: 65, votesAgainst: 12, votes: [] 
     },
     { 
-      id: 'p2', title: 'Achat groupé de tracteurs électriques', description: 'Renouveler la flotte de tracteurs avec des modèles électriques pour une agriculture plus verte.', 
+      id: 'p2', title: 'Achat groupé de tracteurs électriques', description: 'Renouveler la flotte de tracteurs avec des modèles électriques pour une agriculture plus verte et durable.', 
       amount: 45000000, category: 'Matériel', createdBy: 'Admin', createdAt: '2023-10-05', 
       status: 'active', votesFor: 42, votesAgainst: 40, votes: [] 
     },
     { 
-      id: 'p3', title: 'Changement de prestataire logistique', description: 'Passer à un transporteur local pour la distribution de nos produits.', 
+      id: 'p3', title: 'Changement de prestataire logistique', description: 'Passer à un transporteur local pour la distribution de nos produits afin de favoriser l\'économie de proximité.', 
       amount: 0, category: 'Logistique', createdBy: 'Admin', createdAt: '2023-09-15', 
       status: 'approved', votesFor: 92, votesAgainst: 5, votes: [] 
+    },
+    { 
+      id: 'p4', title: 'Nouveau forage pour le secteur Sud', description: 'Creuser un puits artésien pour sécuriser l\'accès à l\'eau pendant la saison sèche.', 
+      amount: 3500000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-20', 
+      status: 'active', votesFor: 128, votesAgainst: 2, votes: [] 
     }
   ],
   equipment: [
-    { name: 'John Deere 8R #04', id: 'JD-2023-004', status: 'Opérationnel', color: 'var(--ve-green)', date: '15 Oct 2023' },
+    { name: 'John Deere 8R #04', id: 'JD-2023-004', status: 'Opérationnel', color: '#10B981', date: '15 Oct 2023' },
     { name: 'Moissonneuse Class #01', id: 'CL-2022-001', status: 'En Maintenance', color: '#F59E0B', date: '28 Oct 2023' },
-    { name: 'Tracteur Kubota #12', id: 'KB-2023-012', status: 'Opérationnel', color: 'var(--ve-green)', date: '10 Sep 2023' },
-    { name: 'Drone Surveillance A1', id: 'DR-2024-001', status: 'Opérationnel', color: 'var(--ve-green)', date: '01 Nov 2023' }
+    { name: 'Tracteur Kubota #12', id: 'KB-2023-012', status: 'Opérationnel', color: '#10B981', date: '10 Sep 2023' },
+    { name: 'Drone Surveillance A1', id: 'DR-2024-001', status: 'Opérationnel', color: '#10B981', date: '01 Nov 2023' },
+    { name: 'Système Irrigation #08', id: 'IR-2021-008', status: 'Alerte Filtre', color: '#EF4444', date: '22 Oct 2023' }
   ],
   alerts: [
     { title: 'Vidange Requise', description: 'John Deere #08 — 450h dépassées', type: 'critical' },
     { title: 'Contrôle Technique', description: 'Remorque Benne #02 — Échéance dans 3 jours', type: 'warning' },
-    { title: 'Changement Filtres', description: 'Système Irrigation Sud — Maintenance préventive', type: 'info' }
+    { title: 'Changement Filtres', description: 'Système Irrigation Sud — Maintenance préventive', type: 'info' },
+    { title: 'Niveau d\'Huile Bas', description: 'Tracteur Kubota #05 — Vérifier niveau', type: 'warning' }
   ],
   equipmentStats: [
     { label: 'TRACTEURS', val: '12', icon: '🚜' },
