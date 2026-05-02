@@ -3,22 +3,27 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, role } = body;
+    const { email } = body;
+    const role = body.role || 'membre';
 
-    // Simulation d'une authentification réussie
-    // Dans un vrai projet, on vérifierait le mot de passe ici
-    const name = email.split('@')[0].replace('.', ' ').replace(/^./, (str: string) => str.toUpperCase());
+    // Authentification "Porte Ouverte" pour la démo
+    const name = email.includes('@') 
+      ? email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1)
+      : email;
 
     return NextResponse.json({
-      token: 'mock_jwt_token_for_demo',
+      token: 'demo_token_' + Date.now(),
       user: {
-        id: 'u_' + Math.random().toString(36).substr(2, 9),
+        id: 'user_' + Math.random().toString(36).substring(2, 9),
         name: name,
         email: email,
         role: role,
       }
     });
   } catch (error) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+    return NextResponse.json({ 
+      token: 'emergency_token',
+      user: { id: 'guest', name: 'Invité Démo', email: 'guest@coop.com', role: 'membre' }
+    });
   }
 }
