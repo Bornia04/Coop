@@ -72,14 +72,36 @@ const INITIAL_DATA = {
 };
 
 function readDB() {
+  const dir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
   if (!fs.existsSync(DB_PATH)) {
     fs.writeFileSync(DB_PATH, JSON.stringify(INITIAL_DATA, null, 2));
     return INITIAL_DATA;
   }
-  return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+
+  const content = fs.readFileSync(DB_PATH, 'utf-8');
+  if (!content || content.trim() === '') {
+    fs.writeFileSync(DB_PATH, JSON.stringify(INITIAL_DATA, null, 2));
+    return INITIAL_DATA;
+  }
+
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    console.error('Database corruption detected, resetting to initial data.');
+    fs.writeFileSync(DB_PATH, JSON.stringify(INITIAL_DATA, null, 2));
+    return INITIAL_DATA;
+  }
 }
 
 function writeDB(data: any) {
+  const dir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
   fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
