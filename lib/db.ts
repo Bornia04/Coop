@@ -25,6 +25,7 @@ export interface Proposal {
   votesFor: number;
   votesAgainst: number;
   votes: { memberId: string; vote: 'for' | 'against'; txHash: string }[];
+  txHash?: string;
 }
 
 const INITIAL_DATA = {
@@ -42,22 +43,22 @@ const INITIAL_DATA = {
     { 
       id: 'p1', title: 'Expansion du parc photovoltaïque', description: 'Installer des panneaux solaires supplémentaires sur le hangar nord pour réduire les coûts énergétiques de la coopérative de 40%.', 
       amount: 15000000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-01', 
-      status: 'active', votesFor: 65, votesAgainst: 12, votes: [] 
+      status: 'active', votesFor: 65, votesAgainst: 12, votes: [], txHash: '0x7d2f...1a9e' 
     },
     { 
       id: 'p2', title: 'Achat groupé de tracteurs électriques', description: 'Renouveler la flotte de tracteurs avec des modèles électriques pour une agriculture plus verte et durable.', 
       amount: 45000000, category: 'Matériel', createdBy: 'Admin', createdAt: '2023-10-05', 
-      status: 'active', votesFor: 42, votesAgainst: 40, votes: [] 
+      status: 'active', votesFor: 42, votesAgainst: 40, votes: [], txHash: '0x3a1b...8c4d' 
     },
     { 
       id: 'p3', title: 'Changement de prestataire logistique', description: 'Passer à un transporteur local pour la distribution de nos produits afin de favoriser l\'économie de proximité.', 
       amount: 0, category: 'Logistique', createdBy: 'Admin', createdAt: '2023-09-15', 
-      status: 'approved', votesFor: 92, votesAgainst: 5, votes: [] 
+      status: 'approved', votesFor: 92, votesAgainst: 5, votes: [], txHash: '0x9e2c...3f1a' 
     },
     { 
       id: 'p4', title: 'Nouveau forage pour le secteur Sud', description: 'Creuser un puits artésien pour sécuriser l\'accès à l\'eau pendant la saison sèche.', 
       amount: 3500000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-20', 
-      status: 'active', votesFor: 128, votesAgainst: 2, votes: [] 
+      status: 'active', votesFor: 128, votesAgainst: 2, votes: [], txHash: '0x1c4b...7d2e' 
     }
   ],
   equipment: [
