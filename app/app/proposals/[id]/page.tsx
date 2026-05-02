@@ -197,7 +197,9 @@ export default function ProposalDetail() {
            </div>
 
            <div style={{ background: '#0F172A', padding: '2.5rem', borderRadius: '32px', color: 'white' }}>
-             <IconShield size={32} color="#10B981" style={{ marginBottom: '1.5rem' }} />
+             <div style={{ marginBottom: '1.5rem' }}>
+               <IconShield size={32} color="#10B981" />
+             </div>
              <h4 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem' }}>Vérification Blockchain</h4>
              <p style={{ opacity: 0.6, fontSize: '0.9rem', lineHeight: 1.6 }}>
                Chaque vote est unique et protégé par votre clé cryptographique. Une fois émis, il est impossible de le modifier ou de le supprimer du registre.
