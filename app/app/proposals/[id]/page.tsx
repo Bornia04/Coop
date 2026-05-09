@@ -214,30 +214,8 @@ export default function ProposalDetail() {
               )}
               
               {isActive ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <button 
-                    onClick={() => handleVote('for')} 
-                    disabled={voting}
-                    style={{ 
-                      width: '100%', background: '#059669', color: 'white', padding: '1.2rem', 
-                      borderRadius: '16px', border: 'none', fontWeight: 900, fontSize: '1.1rem', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem',
-                      opacity: voting ? 0.7 : 1
-                    }}
-                  >
-                    {voting ? 'Signature...' : <><IconCheck size={20} /> Voter POUR</>}
-                  </button>
-                  <button 
-                    onClick={() => handleVote('against')} 
-                    disabled={voting}
-                    style={{ 
-                      width: '100%', background: 'white', color: '#EF4444', padding: '1.2rem', 
-                      borderRadius: '16px', border: '2px solid #EF444420', fontWeight: 900, fontSize: '1.1rem', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem'
-                    }}
-                  >
-                    <IconX size={20} /> Voter CONTRE
-                  </button>
+                <div style={{ background: '#F1F5F9', padding: '1.5rem', borderRadius: '16px', textAlign: 'center', fontWeight: 800, color: '#059669', border: '1px solid #DCFCE7' }}>
+                   📱 VOTEZ VIA L'APPLICATION MOBILE
                 </div>
               ) : (
                 <div style={{ background: '#F1F5F9', padding: '1.5rem', borderRadius: '16px', textAlign: 'center', fontWeight: 800, color: '#64748B' }}>

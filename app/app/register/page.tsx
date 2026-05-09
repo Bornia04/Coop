@@ -1,117 +1,143 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { IconShield } from '@/components/Icons';
 
 export default function Register() {
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: 'Outfit, sans-serif' }}>
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'membre'
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erreur d\'inscription');
+      }
+
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('user_name', data.user.name);
+      localStorage.setItem('user_role', data.user.role);
       
-      {/* Left Sidebar */}
-      <div style={{ 
-        flex: '0 0 480px', 
-        background: 'linear-gradient(135deg, #022C22 0%, #064E3B 100%)', 
-        padding: '5rem 4rem', 
-        display: 'flex', 
-        flexDirection: 'column',
-        color: 'white'
-      }}>
-        <Link href="/" style={{ fontSize: '2.2rem', fontWeight: 900, color: '#10B981', textDecoration: 'none', marginBottom: '1rem' }}>CoopLedger</Link>
-        <p style={{ opacity: 0.6, fontSize: '1rem', fontWeight: 600, marginBottom: '5rem' }}>L'excellence technologique au service de la terre.</p>
+      window.location.href = '/app/dashboard';
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-          {[
-            { title: 'Transparence Totale', desc: 'Visualisez chaque transaction de votre exploitation avec une traçabilité sans faille.' },
-            { title: 'Gouvernance Active', desc: 'Prenez part aux décisions majeures via un système de vote décentralisé.' },
-            { title: 'Sécurité Blockchain', desc: 'Vos données sont protégées par les protocoles cryptographiques les plus avancés.' }
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
-              <div style={{ background: 'rgba(255,255,255,0.1)', padding: '0.8rem', borderRadius: '12px' }}>
-                <IconShield size={20} color="#10B981" />
-              </div>
-              <div>
-                <h4 style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: '0.4rem' }}>{item.title}</h4>
-                <p style={{ opacity: 0.6, fontSize: '0.9rem', lineHeight: 1.6 }}>{item.desc}</p>
-              </div>
-            </div>
-          ))}
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#022C22] px-4">
+      <div className="w-full max-w-[480px] space-y-8">
+        <div className="text-center">
+          <Link href="/" className="text-4xl font-black text-primary tracking-tighter">CoopLedger</Link>
+          <p className="text-white/60 mt-2 font-medium">Rejoignez la coopérative décentralisée</p>
         </div>
 
-        <div style={{ marginTop: 'auto', background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '32px', border: '1px solid rgba(255,255,255,0.1)' }}>
-           <p style={{ fontSize: '0.9rem', lineHeight: 1.6, opacity: 0.8, fontStyle: 'italic' }}>
-             "CoopLedger a transformé notre façon de collaborer. La confiance est désormais gravée dans le code."
-           </p>
-           <p style={{ marginTop: '1rem', fontWeight: 800, fontSize: '0.85rem' }}>— Jean-Baptiste K., Producteur de Cacao</p>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{ flex: 1, background: '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4rem' }}>
-        <div style={{ width: '100%', maxWidth: '640px', background: 'white', padding: '4rem', borderRadius: '40px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.05)' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0F172A', marginBottom: '1rem' }}>Rejoindre le Réseau</h1>
-          <p style={{ color: '#64748B', fontSize: '1.1rem', marginBottom: '3.5rem' }}>Créez votre identité numérique sur le Ledger et commencez à gérer votre exploitation.</p>
-
-          <form onSubmit={(e) => { 
-            e.preventDefault(); 
-            const prenom = (e.target as any).elements[0].value;
-            const nom = (e.target as any).elements[1].value;
-            localStorage.setItem('user_name', prenom + ' ' + nom);
-            window.location.href = '/app/dashboard'; 
-          }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>PRÉNOM</label>
-                <input 
-                  type="text" 
-                  style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600 }} 
-                  required 
-                />
+        <Card className="border-none shadow-2xl rounded-[32px] p-4">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-3xl font-black text-slate-900">Inscription</CardTitle>
+            <CardDescription className="text-base text-slate-500">
+              Créez votre compte pour participer à la gouvernance.
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              {error && (
+                <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-bold border border-red-100">
+                  {error}
+                </div>
+              )}
+              <div className="space-y-4 group/field">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Nom Complet</label>
+                <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+                  <input 
+                    placeholder="Kofi Mensah" 
+                    className="w-full bg-transparent border-none focus:ring-0 text-slate-900 font-bold p-4 h-14"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>NOM</label>
-                <input 
-                  type="text" 
-                  style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600 }} 
-                  required 
-                />
+              <div className="space-y-4 group/field">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Email</label>
+                <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+                  <input 
+                    type="email" 
+                    placeholder="nom@coop.com" 
+                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none rounded-2xl text-slate-900 font-bold p-4 h-14"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    required
+                  />
+                </div>
               </div>
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>ADRESSE EMAIL PROFESSIONNELLE</label>
-              <input 
-                type="email" 
-                style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600 }} 
-                required 
-              />
-            </div>
-
-            <div style={{ marginBottom: '2.5rem' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>MOT DE PASSE</label>
-              <input 
-                type="password" 
-                style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600 }} 
-                required 
-              />
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '3rem' }}>
-              <input type="checkbox" style={{ width: '20px', height: '20px', marginTop: '0.2rem', accentColor: '#10B981' }} required />
-              <p style={{ fontSize: '0.9rem', color: '#64748B', lineHeight: 1.5 }}>
-                J'accepte les <Link href="#" style={{ color: '#059669', fontWeight: 800, textDecoration: 'none' }}>Conditions d'Utilisation</Link> et la <Link href="#" style={{ color: '#059669', fontWeight: 800, textDecoration: 'none' }}>Politique de Confidentialité</Link>.
-              </p>
-            </div>
-
-            <button type="submit" style={{ width: '100%', background: '#059669', color: 'white', padding: '1.2rem', borderRadius: '16px', border: 'none', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer', boxShadow: '0 10px 20px -5px rgba(5, 150, 105, 0.3)' }}>
-              Initialiser mon Compte Blockchain
-            </button>
+              <div className="space-y-4 group/field">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Mot de passe</label>
+                <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none rounded-2xl text-slate-900 font-bold p-4 h-14"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-4 group/field">
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Rôle souhaité</label>
+                <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+                  <select 
+                    className="w-full h-14 rounded-2xl border-none bg-transparent px-3 py-2 text-sm font-bold focus:ring-0 focus:outline-none"
+                    value={formData.role}
+                    onChange={(e) => setFormData({...formData, role: e.target.value})}
+                    required
+                  >
+                    <option value="membre">Membre Agriculteur</option>
+                    <option value="tresorier">Trésorier</option>
+                    <option value="president">Président</option>
+                  </select>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-6 mt-4">
+              <Button type="submit" className="w-full h-16 rounded-2xl text-lg font-black shadow-2xl shadow-primary/30 transition-all hover:scale-[1.01] active:scale-[0.98]" disabled={loading}>
+                {loading ? 'Création en cours...' : 'Créer mon Compte'}
+              </Button>
+              <div className="text-center text-sm mb-4">
+                <span className="text-slate-500 font-medium">Déjà inscrit ? </span>
+                <Link href="/app/login" className="text-primary font-bold hover:underline">Se connecter</Link>
+              </div>
+            </CardFooter>
           </form>
+        </Card>
 
-          <p style={{ textAlign: 'center', marginTop: '2.5rem', fontSize: '1rem', color: '#64748B', fontWeight: 600 }}>
-            Déjà inscrit ? <Link href="/app/login" style={{ color: '#059669', fontWeight: 800, textDecoration: 'none' }}>Connectez-vous</Link>
-          </p>
+        <div className="flex items-center justify-center gap-2 text-white/40 text-[10px] font-black uppercase tracking-tighter">
+          <IconShield size={14} /> Inscription Sécurisée et Protégée
         </div>
       </div>
     </div>
   );
 }
-

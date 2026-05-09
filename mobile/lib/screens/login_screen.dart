@@ -176,16 +176,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await authService.login(
         _emailController.text,
         _passwordController.text,
-        _selectedRole,
       );
       
       setState(() => _isLoading = false);
 
       if (success && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
+        // Pas besoin de Navigator, le Consumer dans main.dart s'en occupe
       }
     } catch (e) {
       setState(() => _isLoading = false);

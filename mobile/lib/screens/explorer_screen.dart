@@ -25,10 +25,6 @@ class _ExplorerScreenState extends State<ExplorerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
         title: const Text('Ledger Explorer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         actions: [
           IconButton(

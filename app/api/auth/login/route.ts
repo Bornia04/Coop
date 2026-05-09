@@ -1,29 +1,35 @@
 import { NextResponse } from 'next/server';
+import { getDB } from '@/lib/db';
+import { AuthService } from '@/lib/auth';
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    const { email } = body;
-    const role = body.role || 'membre';
+    const { email, password } = await req.json();
 
-    // Authentification "Porte Ouverte" pour la démo
-    const name = email.includes('@') 
-      ? email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1)
-      : email;
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email et mot de passe requis' }, { status: 400 });
+    }
 
-    return NextResponse.json({
-      token: 'demo_token_' + Date.now(),
-      user: {
-        id: 'user_' + Math.random().toString(36).substring(2, 9),
-        name: name,
-        email: email,
-        role: role,
-      }
+    const db = getDB();
+    const user = db.users.find((u: any) => u.email === email);
+
+    if (!user) {
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 401 });
+    }
+
+    const isValid = await AuthService.verifyPassword(password, user.password || user.passwordHash);
+    if (!isValid) {
+      return NextResponse.json({ error: 'Mot de passe incorrect' }, { status: 401 });
+    }
+
+    const token = AuthService.generateToken(user);
+
+    return NextResponse.json({ 
+      token, 
+      user: { id: user.id, name: user.name, role: user.role, email: user.email } 
     });
   } catch (error) {
-    return NextResponse.json({ 
-      token: 'emergency_token',
-      user: { id: 'guest', name: 'Invité Démo', email: 'guest@coop.com', role: 'membre' }
-    });
+    console.error('Login Error:', error);
+    return NextResponse.json({ error: 'Erreur lors de la connexion' }, { status: 500 });
   }
 }

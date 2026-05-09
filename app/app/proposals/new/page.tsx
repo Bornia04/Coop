@@ -4,12 +4,15 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { generateTxHash, generateBlockNumber, NETWORK } from '@/lib/blockchain';
 import { IconShield, IconSend } from '@/components/Icons';
+import { ArrowLeft } from 'lucide-react';
+import { useNotify } from '@/components/NotificationProvider';
 
 export default function NewProposal() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ txHash: string; block: number } | null>(null);
   const [form, setForm] = useState({ title: '', description: '', amount: '', category: 'Engrais', durationHours: '72' });
+  const { notify } = useNotify();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +29,7 @@ export default function NewProposal() {
         description: form.description,
         amount: parseFloat(form.amount),
         category: form.category,
+        durationHours: parseInt(form.durationHours),
         createdBy: localStorage.getItem('user_name') || 'Admin',
         txHash: hash,
         blockNumber: block
@@ -34,6 +38,7 @@ export default function NewProposal() {
 
     if (res.ok) {
       setResult({ txHash: hash, block });
+      notify("Proposition Blockchain Scellée", "Votre proposition a été enregistrée sur la blockchain.", "success");
     }
     setSubmitting(false);
   };
@@ -44,7 +49,7 @@ export default function NewProposal() {
         <IconShield size={48} color="#059669" />
       </div>
       <h1 style={{ fontSize: '3rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em' }}>Proposition <span style={{ color: '#059669' }}>Scellée</span></h1>
-      <p style={{ color: '#64748B', fontSize: '1.2rem', marginTop: '1rem' }}>Votre demande a été enregistrée de manière immuable sur le réseau.</p>
+      <p style={{ color: '#64748B', fontSize: '1.2rem', marginTop: '1rem' }}>Votre demande a été enregistrée de manière immuable sur la blockchain.</p>
       
       <div style={{ background: 'white', padding: '3rem', borderRadius: '32px', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', border: '1px solid #F1F5F9', marginTop: '3rem', textAlign: 'left' }}>
          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem', color: '#059669', fontWeight: 800 }}>
@@ -74,80 +79,125 @@ export default function NewProposal() {
   );
 
   return (
-    <div style={{ padding: '1rem 0', maxWidth: '800px' }}>
-      <div style={{ marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2.8rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em' }}>Nouvelle <span style={{ color: '#059669' }}>Proposition</span></h1>
-        <p style={{ color: '#64748B', fontSize: '1.1rem', marginTop: '0.4rem' }}>Soumettez une nouvelle dépense stratégique au vote de la coopérative</p>
+    <div className="py-12 max-w-3xl mx-auto px-6">
+      <Link 
+        href="/app/proposals" 
+        className="inline-flex items-center gap-2 text-slate-500 hover:text-primary transition-colors mb-8 font-bold group"
+      >
+        <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+        Retour aux propositions
+      </Link>
+
+      <div className="mb-12">
+        <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+          Nouvelle <span className="text-primary">Proposition</span>
+        </h1>
+        <p className="text-slate-500 mt-2 text-lg">
+          Soumettez une nouvelle dépense stratégique au vote de la coopérative
+        </p>
       </div>
 
-      <div style={{ background: 'white', padding: '3.5rem', borderRadius: '40px', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)', border: '1px solid #F1F5F9' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>TITRE DE LA PROPOSITION</label>
-            <input 
-              type="text" 
-              value={form.title} 
-              onChange={e => setForm({ ...form, title: e.target.value })} 
-              required 
-              placeholder="Ex: Achat d'un nouveau tracteur Massey Ferguson"
-              style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600, fontSize: '1rem' }}
-            />
+      <div className="bg-white p-12 rounded-[40px] shadow-2xl shadow-slate-200/50 border border-slate-100">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-4 group/field">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Titre de la proposition</label>
+            <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+              <input 
+                type="text" 
+                placeholder="Ex: Achat d'un nouveau tracteur Massey Ferguson" 
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none rounded-2xl text-slate-900 font-bold p-4 h-14"
+                value={form.title}
+                onChange={(e) => setForm({...form, title: e.target.value})}
+                required
+              />
+            </div>
           </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>DESCRIPTION DÉTAILLÉE</label>
-            <textarea 
-              value={form.description} 
-              onChange={e => setForm({ ...form, description: e.target.value })} 
-              required 
-              placeholder="Justifiez le besoin et l'impact sur la productivité..."
-              style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600, fontSize: '1rem', minHeight: '150px' }}
-            />
+
+          <div className="space-y-4 group/field">
+            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Description détaillée</label>
+            <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+              <textarea 
+                placeholder="Justifiez le besoin et l'impact sur la productivité..." 
+                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none rounded-2xl text-slate-900 font-bold p-4 min-h-[150px]"
+                value={form.description}
+                onChange={(e) => setForm({...form, description: e.target.value})}
+                required
+              />
+            </div>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-             <div>
-               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>MONTANT ESTIMÉ (FCFA)</label>
-               <input 
-                type="number" 
-                value={form.amount} 
-                onChange={e => setForm({ ...form, amount: e.target.value })} 
-                required 
-                style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600, fontSize: '1rem' }}
-               />
-             </div>
-             <div>
-               <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 800, color: '#0F172A', marginBottom: '0.8rem' }}>CATÉGORIE D'INVESTISSEMENT</label>
-               <select 
-                value={form.category} 
-                onChange={e => setForm({ ...form, category: e.target.value })}
-                style={{ width: '100%', padding: '1.2rem', borderRadius: '16px', border: '2px solid #F1F5F9', background: '#F8FAFC', outline: 'none', fontWeight: 600, fontSize: '1rem', appearance: 'none' }}
-               >
-                 <option>Semences</option>
-                 <option>Engrais</option>
-                 <option>Matériel</option>
-                 <option>Infrastructure</option>
-               </select>
-             </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-4 group/field">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Montant estimé (FCFA)</label>
+              <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+                <input 
+                  type="number" 
+                  className="w-full bg-transparent border-none focus:ring-0 focus:outline-none rounded-2xl text-slate-900 font-bold p-4 h-14"
+                  value={form.amount}
+                  onChange={(e) => setForm({...form, amount: e.target.value})}
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-4 group/field">
+              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 group-focus-within/field:text-primary transition-colors">Catégorie d'investissement</label>
+              <div className="p-1 rounded-2xl bg-slate-50 border border-slate-200 group-focus-within/field:border-primary group-hover/field:bg-slate-100/50 transition-all duration-300 shadow-sm group-focus-within/field:shadow-md">
+                <select 
+                  className="w-full h-14 rounded-2xl border-none bg-transparent px-4 text-sm font-bold focus:ring-0 focus:outline-none"
+                  value={form.category}
+                  onChange={(e) => setForm({...form, category: e.target.value})}
+                >
+                  <option>Semences</option>
+                  <option>Engrais</option>
+                  <option>Matériel</option>
+                  <option>Infrastructure</option>
+                </select>
+              </div>
+            </div>
           </div>
-          
-          <div style={{ background: '#F8FAFC', padding: '1.5rem', borderRadius: '20px', border: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <IconShield size={24} color="#059669" />
-            <p style={{ fontSize: '0.9rem', color: '#64748B', fontWeight: 600 }}>
-              Cette proposition sera signée numériquement. Une fois soumise, elle ne pourra plus être modifiée.
+
+          <div 
+            className={`p-6 rounded-2xl border transition-all duration-300 flex items-center gap-4 cursor-pointer ${
+              form.durationHours === '1'
+                ? "bg-red-50 border-red-200 shadow-lg shadow-red-100" 
+                : "bg-slate-50 border-slate-100 hover:bg-slate-100"
+            }`}
+            onClick={() => setForm({...form, durationHours: form.durationHours === '1' ? '72' : '1'})}
+          >
+            <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${
+              form.durationHours === '1' ? "bg-red-500 border-red-500" : "border-slate-300 bg-white"
+            }`}>
+              {form.durationHours === '1' && <div className="w-2 h-2 bg-white rounded-full animate-pulse" />}
+            </div>
+            <div>
+              <p className={`text-xs font-black uppercase tracking-widest ${
+                form.durationHours === '1' ? "text-red-600" : "text-slate-600"
+              }`}>
+                Proposition Urgente (Vote de 1 minute)
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100 flex items-start gap-4">
+            <IconShield size={24} color="#059669" className="mt-1 flex-shrink-0" />
+            <p className="text-sm text-slate-600 font-medium leading-relaxed">
+              Cette proposition sera scellée de manière immuable. Une fois soumise, elle ne pourra plus être modifiée et sera soumise au vote.
             </p>
           </div>
 
           <button 
             type="submit" 
             disabled={submitting}
-            style={{ 
-              marginTop: '1rem', background: '#059669', color: 'white', padding: '1.5rem', borderRadius: '20px', 
-              border: 'none', fontWeight: 900, fontSize: '1.2rem', cursor: 'pointer',
-              boxShadow: '0 10px 20px -5px rgba(5, 150, 105, 0.3)', transition: 'all 0.2s',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem',
-              opacity: submitting ? 0.7 : 1
-            }}
+            className="w-full h-16 rounded-2xl bg-primary text-white font-black text-lg shadow-2xl shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 flex items-center justify-center gap-3"
           >
-            {submitting ? 'Signature Cryptographique...' : <><IconSend size={20} /> Envoyer la Proposition</>}
+            {submitting ? (
+              "Signature en cours..."
+            ) : (
+              <>
+                <IconSend size={20} />
+                Envoyer la Proposition
+              </>
+            )}
           </button>
         </form>
       </div>

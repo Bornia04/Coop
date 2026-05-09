@@ -159,7 +159,15 @@ class _ProposalDetailScreenState extends State<ProposalDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Résultats actuels', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
-              Text('${(widget.progress * 100).toInt()}% Pour', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900)),
+              Text(
+                (widget.votesFor + widget.votesAgainst) == 0 
+                  ? 'Aucun vote' 
+                  : '${(widget.progress * 100).toInt()}% Pour', 
+                style: TextStyle(
+                  color: (widget.votesFor + widget.votesAgainst) == 0 ? Colors.white38 : const Color(0xFF10B981), 
+                  fontWeight: FontWeight.w900
+                )
+              ),
             ],
           ),
           const SizedBox(height: 20),

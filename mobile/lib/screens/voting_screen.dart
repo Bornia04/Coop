@@ -112,16 +112,32 @@ class _VotingScreenState extends State<VotingScreen> {
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Vote "$vote" enregistré pour : $title'),
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(child: Text('Vote "$vote" scellé sur le réseau pour : $title')),
+            ],
+          ),
           backgroundColor: const Color(0xFF10B981),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       );
       _refreshProposals();
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erreur : Vous avez déjà voté ou le vote est clos.'),
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.white),
+              const SizedBox(width: 12),
+              const Expanded(child: Text('Erreur : Vous avez déjà voté ou le vote est clos.')),
+            ],
+          ),
           backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       );
     }

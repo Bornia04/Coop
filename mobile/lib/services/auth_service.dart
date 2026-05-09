@@ -30,19 +30,39 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<bool> login(String email, String password, String role) async {
-    final result = await _apiService.login(email, password, role);
+  Future<bool> login(String email, String password) async {
+    final result = await _apiService.login(email, password);
     
     if (result != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', result['token']);
       await prefs.setString('user_name', result['user']['name']);
-      await prefs.setString('user_role', role);
+      await prefs.setString('user_role', result['user']['role']);
       await prefs.setString('user_id', result['user']['id']);
 
       _isAuthenticated = true;
       _userName = result['user']['name'];
-      _role = role;
+      _role = result['user']['role'];
+      _userId = result['user']['id'];
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  Future<bool> register(String name, String email, String password, String role) async {
+    final result = await _apiService.register(name, email, password, role);
+    
+    if (result != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', result['token']);
+      await prefs.setString('user_name', result['user']['name']);
+      await prefs.setString('user_role', result['user']['role']);
+      await prefs.setString('user_id', result['user']['id']);
+
+      _isAuthenticated = true;
+      _userName = result['user']['name'];
+      _role = result['user']['role'];
       _userId = result['user']['id'];
       notifyListeners();
       return true;

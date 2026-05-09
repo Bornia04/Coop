@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/main_navigator.dart';
 import 'services/auth_service.dart';
 
 void main() {
@@ -59,9 +61,14 @@ class CoopLedgerApp extends StatelessWidget {
           hintStyle: const TextStyle(color: Colors.white54),
         ),
       ),
+      routes: {
+        '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/dashboard': (context) => const HomeScreen(),
+      },
       home: Consumer<AuthService>(
         builder: (context, auth, _) {
-          return auth.isAuthenticated ? const HomeScreen() : const LoginScreen();
+          return auth.isAuthenticated ? const MainNavigator() : const LoginScreen();
         },
       ),
     );

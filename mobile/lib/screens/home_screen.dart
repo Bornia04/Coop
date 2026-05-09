@@ -7,14 +7,123 @@ import 'voting_screen.dart';
 import 'explorer_screen.dart';
 import 'profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import '../services/auth_service.dart';
+import '../services/api_service.dart';
+import 'voting_screen.dart';
+import 'explorer_screen.dart';
+import 'profile_screen.dart';
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ApiService _apiService = ApiService();
+  Timer? _timer;
+  int _lastProposalCount = 0;
+  List<dynamic> _transactions = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchInitialData();
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      _pollData();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _fetchInitialData() async {
+    try {
+      final txs = await _apiService.getTransactions();
+      final props = await _apiService.getProposals();
+      if (mounted) {
+        setState(() {
+          _transactions = txs;
+          _lastProposalCount = props.length;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _pollData() async {
+    try {
+      final txs = await _apiService.getTransactions();
+      final props = await _apiService.getProposals();
+
+      if (mounted) {
+        if (props.length > _lastProposalCount) {
+          final newProp = props.last;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.notifications_active, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Nouvelle proposition : ${newProp['title']}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: const Color(0xFF10B981),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              action: SnackBarAction(
+                label: 'VOIR',
+                textColor: Colors.white,
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const VotingScreen()));
+                },
+              ),
+            ),
+          );
+        }
+
+        setState(() {
+          _transactions = txs;
+          _lastProposalCount = props.length;
+        });
+      }
+    } catch (e) {
+      debugPrint('Polling error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthService>();
-    final apiService = ApiService();
     
+    double totalBalance = 0;
+    for (var t in _transactions) {
+      if (t['type'] == 'credit') {
+        totalBalance += (t['amount'] as num).toDouble();
+      } else {
+        totalBalance -= (t['amount'] as num).toDouble();
+      }
+    }
+
+    final formatter = NumberFormat.currency(locale: 'fr_FR', symbol: 'FCFA', decimalDigits: 0);
+    final balanceStr = formatter.format(totalBalance);
+
     return Scaffold(
       backgroundColor: const Color(0xFF020617),
       appBar: AppBar(
@@ -39,75 +148,67 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: apiService.getTransactions(),
-        builder: (context, snapshot) {
-          final txs = snapshot.data ?? [];
-          double totalBalance = 0;
-          for (var t in txs) {
-            if (t['type'] == 'credit') {
-              totalBalance += (t['amount'] as num).toDouble();
-            } else {
-              totalBalance -= (t['amount'] as num).toDouble();
-            }
-          }
-
-          final formatter = NumberFormat.currency(locale: 'fr_FR', symbol: 'FCFA', decimalDigits: 0);
-          final balanceStr = formatter.format(totalBalance);
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                Text(
-                  'Bonjour, ${auth.userName}',
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white),
-                ),
-                const Text(
-                  'Votre activité blockchain aujourd\'hui',
-                  style: TextStyle(color: Colors.white54, fontSize: 16),
-                ),
-                const SizedBox(height: 32),
-                _buildBalanceCard(balanceStr),
-                const SizedBox(height: 40),
-                _buildSectionTitle('Actions Rapides'),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _buildQuickAction(context, Icons.how_to_vote, 'Voter', const Color(0xFF3B82F6), () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const VotingScreen()));
-                    }),
-                    const SizedBox(width: 16),
-                    _buildQuickAction(context, Icons.history, 'Explorer', const Color(0xFF10B981), () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerScreen()));
-                    }),
-                  ],
-                ),
-                const SizedBox(height: 40),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildSectionTitle('Dernières Transactions'),
-                    TextButton(
-                      onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerScreen())),
-                      child: const Text('Voir tout', style: TextStyle(color: Color(0xFF10B981))),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                _buildTransactionList(txs, snapshot.connectionState == ConnectionState.waiting),
-                const SizedBox(height: 32),
-                _buildSectionTitle('Top Contributeurs'),
-                const SizedBox(height: 16),
-                _buildReputationRanking(apiService),
-                const SizedBox(height: 32),
-              ],
+      body: _loading 
+        ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
+        : RefreshIndicator(
+            onRefresh: _pollData,
+            color: const Color(0xFF10B981),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Bienvenue ${auth.role == 'president' ? 'Président' : (auth.role == 'tresorier' ? 'Trésorier' : 'Membre')}',
+                    style: const TextStyle(color: Color(0xFF10B981), fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    auth.userName,
+                    style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white),
+                  ),
+                  const Text(
+                    'Activité Ledger en temps réel',
+                    style: TextStyle(color: Colors.white54, fontSize: 14),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildBalanceCard(balanceStr),
+                  const SizedBox(height: 40),
+                  _buildSectionTitle('Actions Rapides'),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _buildQuickAction(context, Icons.how_to_vote, 'Voter', const Color(0xFF3B82F6), () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const VotingScreen()));
+                      }),
+                      const SizedBox(width: 16),
+                      _buildQuickAction(context, Icons.history, 'Explorer', const Color(0xFF10B981), () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerScreen()));
+                      }),
+                    ],
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionTitle('Dernières Transactions'),
+                      TextButton(
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerScreen())),
+                        child: const Text('Voir tout', style: TextStyle(color: Color(0xFF10B981))),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  _buildTransactionList(_transactions),
+                  const SizedBox(height: 32),
+                  _buildSectionTitle('Top Contributeurs'),
+                  const SizedBox(height: 16),
+                  _buildReputationRanking(_apiService),
+                  const SizedBox(height: 32),
+                ],
+              ),
             ),
-          );
-        }
-      ),
+          ),
     );
   }
 
@@ -115,7 +216,7 @@ class HomeScreen extends StatelessWidget {
     return FutureBuilder<List<dynamic>>(
       future: api.getProposals(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+        if (!snapshot.hasData) return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
         
         final proposals = snapshot.data!;
         final Map<String, int> memberVotes = {};
@@ -260,13 +361,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionList(List<dynamic> txs, bool isLoading) {
-    if (isLoading) {
-      return const Center(child: Padding(
-        padding: EdgeInsets.all(32.0),
-        child: CircularProgressIndicator(color: Color(0xFF10B981)),
-      ));
-    }
+  Widget _buildTransactionList(List<dynamic> txs) {
     if (txs.isEmpty) {
       return const Center(child: Text('Aucune transaction trouvée', style: TextStyle(color: Colors.white54)));
     }
@@ -300,7 +395,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text(t['description'], style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white, fontSize: 16)),
                   const SizedBox(height: 4),
-                  Text('${t['date']} • Blockchain Certifié', style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.4))),
+                  Text('${t['date']} • Transaction Certifiée', style: TextStyle(fontSize: 11, color: Colors.white.withOpacity(0.4))),
                 ],
               ),
             ),

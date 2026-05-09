@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { type Proposal } from '@/lib/db';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { IconShield, IconClock } from '@/components/Icons';
 
 function CountdownTimer({ expiresAt, onEnd }: { expiresAt: string; onEnd: () => void }) {
@@ -27,9 +29,9 @@ function CountdownTimer({ expiresAt, onEnd }: { expiresAt: string; onEnd: () => 
   }, [expiresAt, onEnd]);
 
   return (
-    <span style={{ color: '#EF4444', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+    <div className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-red-100">
       <IconClock size={12} /> {timeLeft}
-    </span>
+    </div>
   );
 }
 
@@ -48,95 +50,81 @@ export default function Proposals() {
 
   useEffect(() => {
     fetchProposals();
-    const interval = setInterval(fetchProposals, 5000);
+    const interval = setInterval(fetchProposals, 2000); // Polling ultra-rapide pour la démo (2s)
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#059669', fontWeight: 800 }}>Chargement de la Gouvernance...</div>;
+  if (loading) return <div className="flex h-full items-center justify-center text-primary font-black uppercase">Ouverture du registre de vote...</div>;
 
   return (
-    <div style={{ padding: '1rem 0' }}>
-      
-      <div style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="space-y-10 p-1">
+      <div className="flex justify-between items-end">
         <div>
-          <h1 style={{ fontSize: '2.8rem', fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em' }}>Gouvernance <span style={{ color: '#059669' }}>Participative</span></h1>
-          <p style={{ color: '#64748B', fontSize: '1.1rem', marginTop: '0.4rem' }}>Prenez part aux décisions stratégiques via le vote sécurisé blockchain</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Gouvernance <span className="text-primary">Participative</span></h1>
+          <p className="text-slate-500 mt-2 text-lg">Participez aux décisions stratégiques de la coopérative</p>
         </div>
-        <Link href="/app/proposals/new" style={{ background: '#059669', color: 'white', padding: '1rem 2rem', borderRadius: '16px', fontWeight: 800, textDecoration: 'none', boxShadow: '0 10px 20px -5px rgba(5, 150, 105, 0.3)' }}>
-          + Créer une Proposition
+        <Link href="/app/proposals/new">
+          <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20">+ Créer une Proposition</Button>
         </Link>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {proposals.map((v) => {
           const total = v.votesFor + v.votesAgainst;
           const pct = total > 0 ? Math.round((v.votesFor / total) * 100) : 0;
           const isActive = v.status === 'active';
           
           return (
-            <div key={v.id} style={{ 
-              background: 'white', 
-              padding: '2.5rem', 
-              borderRadius: '32px', 
-              boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)',
-              border: isActive ? '2px solid #059669' : '1px solid #F1F5F9',
-              position: 'relative',
-              overflow: 'hidden'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                  <span style={{ 
-                    background: isActive ? '#DCFCE7' : (v.status === 'approved' ? '#DCFCE7' : '#FEF2F2'), 
-                    color: isActive ? '#059669' : (v.status === 'approved' ? '#059669' : '#EF4444'), 
-                    padding: '0.5rem 1.2rem', 
-                    borderRadius: '100px', 
-                    fontSize: '0.8rem', 
-                    fontWeight: 900,
-                    letterSpacing: '0.05em'
-                  }}>
-                    {v.status.toUpperCase()}
-                  </span>
-                  {isActive && <CountdownTimer expiresAt={v.expiresAt} onEnd={fetchProposals} />}
+            <Card key={v.id} className={`border-none shadow-xl rounded-[32px] overflow-hidden transition-all hover:scale-[1.02] ${isActive ? 'ring-4 ring-primary/10' : ''}`}>
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-wrap gap-2">
+                    <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${isActive ? 'bg-emerald-50 text-emerald-600' : (v.status === 'approved' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600')}`}>
+                      {v.status}
+                    </span>
+                    {isActive && <CountdownTimer expiresAt={v.expiresAt} onEnd={fetchProposals} />}
+                  </div>
+                  <IconShield size={24} className={isActive ? 'text-primary' : 'text-slate-200'} />
                 </div>
-                <IconShield size={24} color={isActive ? '#059669' : '#94A3B8'} />
-              </div>
-
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0F172A', marginBottom: '2.5rem', height: '3.5rem', overflow: 'hidden', lineHeight: 1.3 }}>{v.title}</h3>
-              
-              <div style={{ marginBottom: '2.5rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', fontWeight: 800, marginBottom: '0.8rem' }}>
-                  <span style={{ color: '#64748B' }}>PROGRESSION</span>
-                  <span style={{ color: '#0F172A' }}>{pct}% POUR</span>
+                <CardTitle className="text-xl font-black text-slate-900 mt-6 leading-tight h-[3.5rem] overflow-hidden">
+                  {v.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                    <span className="text-slate-400">Progression</span>
+                    <span className="text-slate-900">{pct}% Pour</span>
+                  </div>
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden flex">
+                    <div className={`h-full transition-all duration-1000 ${isActive ? 'bg-primary' : (v.status === 'approved' ? 'bg-primary' : 'bg-red-500')}`} style={{ width: `${pct}%` }}></div>
+                    <div className="h-full bg-red-500/20" style={{ width: `${100 - pct}%` }}></div>
+                  </div>
+                  <div className="flex justify-between mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                    <span>{total} Votes scellés</span>
+                    <span>Ledger ID: {v.id}</span>
+                  </div>
                 </div>
-                <div style={{ height: '10px', background: '#F1F5F9', borderRadius: '100px', overflow: 'hidden' }}>
-                  <div style={{ width: `${pct}%`, height: '100%', background: isActive ? '#059669' : (v.status === 'approved' ? '#059669' : '#EF4444'), borderRadius: '100px' }}></div>
+              </CardContent>
+              <CardFooter className="bg-slate-50/50 p-6">
+                <div className="w-full text-center">
+                  {isActive ? (
+                    <div className="bg-primary/10 text-primary p-3 rounded-xl text-[10px] font-black uppercase tracking-widest border border-primary/20">
+                      Votez via l'application Mobile 📱
+                    </div>
+                  ) : (
+                    <Link href={`/app/proposals/${v.id}`} className="w-full">
+                      <Button variant="outline" className="w-full h-12 rounded-xl font-bold">
+                        Consulter le Résultat
+                      </Button>
+                    </Link>
+                  )}
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8' }}>
-                  <span>{total} MEMBRES ONT VOTÉ</span>
-                  <span>{isActive ? 'EN COURS' : 'TERMINÉ'}</span>
-                </div>
-              </div>
-              
-              <Link href={`/app/proposals/${v.id}`} style={{ 
-                width: '100%', 
-                padding: '1.2rem', 
-                borderRadius: '16px', 
-                border: `2px solid ${isActive ? '#059669' : '#E2E8F0'}`, 
-                background: 'white', 
-                color: isActive ? '#059669' : '#0F172A', 
-                fontWeight: 800, 
-                textDecoration: 'none',
-                display: 'flex',
-                justifyContent: 'center',
-                transition: 'all 0.2s'
-              }}>
-                {isActive ? 'Voter Maintenant' : 'Consulter le Résultat'}
-              </Link>
-            </div>
+              </CardFooter>
+            </Card>
           );
         })}
       </div>
     </div>
   );
 }
-
