@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/api_service.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -68,6 +69,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   (auth.role ?? 'Membre').toUpperCase(),
                   style: const TextStyle(color: Color(0xFF10B981), fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 2),
+                ),
+                const SizedBox(height: 32),
+                
+                // My Ledger ID QR Code
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: QrImageView(
+                    data: 'coopledger://user?id=${auth.userId}',
+                    version: QrVersions.auto,
+                    size: 150.0,
+                    gapless: false,
+                    foregroundColor: const Color(0xFF020617),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'MON ID LEDGER SÉCURISÉ',
+                  style: TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1),
                 ),
                 const SizedBox(height: 40),
                 

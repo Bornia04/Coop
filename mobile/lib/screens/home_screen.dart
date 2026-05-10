@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import 'voting_screen.dart';
 import 'explorer_screen.dart';
 import 'profile_screen.dart';
+import 'verification_screen.dart';
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -200,6 +201,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 16),
                       _buildQuickAction(context, Icons.history, 'Explorer', const Color(0xFF10B981), () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerScreen()));
+                      }),
+                      const SizedBox(width: 16),
+                      _buildQuickAction(context, Icons.qr_code_scanner, 'Vérifier', const Color(0xFFF59E0B), () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const VerificationScreen()));
                       }),
                     ],
                   ),

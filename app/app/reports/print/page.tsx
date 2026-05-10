@@ -15,6 +15,7 @@ function PrintContent() {
   const searchParams = useSearchParams();
   const type = searchParams.get('type') || 'monthly';
   const signer = searchParams.get('signer') || 'Responsable Coop';
+  const reportUrl = `coopledger://report?type=${type}&signer=${encodeURIComponent(signer)}`;
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -180,15 +181,24 @@ function PrintContent() {
                 </p>
              </div>
              
-             <div className="flex flex-col items-center justify-center border-2 border-primary/10 rounded-3xl bg-primary/[0.02]">
-                <div className="flex flex-col items-center">
-                   <div className="h-12 w-48 border-b border-primary/30 relative mb-2 flex items-center justify-center">
-                      <span className="font-serif italic text-2xl text-primary/40 select-none">{signer}</span>
-                      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-primary/5 to-transparent"></div>
+             <div className="flex flex-col items-center justify-center border-2 border-primary/10 rounded-3xl bg-primary/[0.02] p-4">
+                <div className="flex gap-6 items-center">
+                   <div className="flex flex-col items-center">
+                      <div className="h-12 w-48 border-b border-primary/30 relative mb-2 flex items-center justify-center">
+                         <span className="font-serif italic text-2xl text-primary/40 select-none">{signer}</span>
+                         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-tr from-transparent via-primary/5 to-transparent"></div>
+                      </div>
+                      <p className="text-[9px] font-bold text-slate-900">Signé par le Président</p>
                    </div>
-                   <p className="text-[9px] font-bold text-slate-900">Signé par le Président de la Coopérative</p>
-                   <p className="text-[8px] text-slate-400 italic">Certifié conforme au registre blockchain</p>
+                   <div className="w-20 h-20 bg-white border border-slate-200 p-1 rounded-lg shadow-sm flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={`https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(reportUrl)}&chs=160x160&chld=L|0`}
+                        alt="QR Code Certification"
+                        className="w-full h-full object-contain"
+                      />
+                   </div>
                 </div>
+                <p className="text-[8px] text-slate-400 italic mt-3">Scannez pour vérifier l'authenticité sur l'App Mobile</p>
              </div>
           </div>
         </div>

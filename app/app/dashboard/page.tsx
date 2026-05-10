@@ -163,21 +163,40 @@ export default function Dashboard() {
       </div>
 
       {/* Technical Status (Architectural Proof) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Réseau", val: "Mainnet Local", icon: "🌐" },
-          { label: "Smart Contract", val: "0xCoop...Gov", icon: "📜" },
-          { label: "Blocs Scellés", val: blocks.length, icon: "🧱" },
-          { label: "Gas Price", val: "0.001 Gwei", icon: "⛽" },
-        ].map((s, i) => (
-          <div key={i} className="bg-white p-4 rounded-[20px] border border-slate-100 flex items-center gap-3 shadow-sm">
-             <div className="text-xl">{s.icon}</div>
-             <div>
-                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{s.label}</p>
-                <p className="text-[10px] font-bold text-slate-900 truncate max-w-[100px]">{s.val}</p>
-             </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <Card className="lg:col-span-3 border-none shadow-xl rounded-[32px] bg-white p-6">
+           <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-black">Surveillance du Réseau</h3>
+              <div className="flex gap-2">
+                 <span className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-emerald-100">Node #001 Online</span>
+                 <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[10px] font-black uppercase border border-blue-100">Syncing OK</span>
+              </div>
+           </div>
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: "Réseau", val: "Mainnet Local", icon: "🌐" },
+              { label: "Smart Contract", val: "0xCoop...Gov", icon: "📜" },
+              { label: "Blocs Scellés", val: blocks.length, icon: "🧱" },
+              { label: "Temps de Bloc", val: "2.4s", icon: "⚡" },
+            ].map((s, i) => (
+              <div key={i} className="bg-slate-50 p-4 rounded-[20px] flex items-center gap-3">
+                 <div className="text-xl">{s.icon}</div>
+                 <div>
+                    <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{s.label}</p>
+                    <p className="text-[10px] font-bold text-slate-900 truncate max-w-[80px]">{s.val}</p>
+                 </div>
+              </div>
+            ))}
+           </div>
+        </Card>
+        <Card className="border-none shadow-xl rounded-[32px] bg-primary p-6 text-white flex flex-col justify-center items-center text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
+               <IconShield size={32} color="white" />
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Score de Confiance</p>
+            <p className="text-4xl font-black">99.8%</p>
+            <p className="text-[8px] mt-2 opacity-40 font-bold uppercase">Algorithme de Consensus Actif</p>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

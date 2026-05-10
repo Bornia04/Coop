@@ -15,7 +15,7 @@ class AuthService extends ChangeNotifier {
   String? get userId => _userId;
 
   AuthService() {
-    _loadSession();
+    // _loadSession(); // Désactivé pour forcer le login au démarrage (Démo)
   }
 
   Future<void> _loadSession() async {
