@@ -14,6 +14,7 @@ export default function ProposalDetail() {
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<string>('');
+  const [totalMembers, setTotalMembers] = useState<number>(150); // Default to 150 if fails
 
   const prevVotesCount = useRef<number>(0);
 
@@ -37,6 +38,9 @@ export default function ProposalDetail() {
 
   useEffect(() => {
     fetchProposal();
+    fetch('/api/stats').then(res => res.json()).then(data => {
+      if (data.totalMembers) setTotalMembers(data.totalMembers);
+    });
     const interval = setInterval(fetchProposal, 3000); 
     return () => clearInterval(interval);
   }, [id]);
@@ -195,15 +199,20 @@ export default function ProposalDetail() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', padding: '1.5rem', background: '#F8FAFC', borderRadius: '20px', marginBottom: '2.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Total des membres</span>
-                  <span style={{ fontWeight: 800, color: '#0F172A' }}>150</span>
+                  <span style={{ fontWeight: 800, color: '#0F172A' }}>{totalMembers}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Votes exprimés</span>
                   <span style={{ fontWeight: 800, color: '#0F172A' }}>{total}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                  <span style={{ color: '#64748B', fontWeight: 600 }}>Quorum requis</span>
-                  <span style={{ fontWeight: 800, color: '#059669' }}>51%</span>
+                  <span style={{ color: '#64748B', fontWeight: 600 }}>Quorum (51% requis)</span>
+                  <span style={{ 
+                    fontWeight: 800, 
+                    color: (total / totalMembers) >= 0.51 ? '#059669' : '#EF4444' 
+                  }}>
+                    {Math.round((total / totalMembers) * 100)}% { (total / totalMembers) >= 0.51 ? '✓ Atteint' : '✗ Insuffisant' }
+                  </span>
                 </div>
               </div>
               

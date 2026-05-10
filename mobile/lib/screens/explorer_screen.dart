@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import '../services/api_service.dart';
 
 class ExplorerScreen extends StatefulWidget {
@@ -8,14 +9,24 @@ class ExplorerScreen extends StatefulWidget {
   State<ExplorerScreen> createState() => _ExplorerScreenState();
 }
 
-class _ExplorerScreenState extends State<ExplorerScreen> {
+class _ExplorerScreenState extends State<ExplorerScreen> with SingleTickerProviderStateMixin {
   final ApiService _apiService = ApiService();
+  late TabController _tabController;
   late Future<List<dynamic>> _transactionsFuture;
+  late Future<List<dynamic>> _blocksFuture;
 
   @override
   void initState() {
     super.initState();
-    _transactionsFuture = _apiService.getTransactions();
+    _tabController = TabController(length: 2, vsync: this);
+    _refreshData();
+  }
+
+  void _refreshData() {
+    setState(() {
+      _transactionsFuture = _apiService.getTransactions();
+      _blocksFuture = _apiService.getBlocks();
+    });
   }
 
   @override
@@ -25,122 +36,165 @@ class _ExplorerScreenState extends State<ExplorerScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Ledger Explorer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
+        title: const Text('CoopLedger Explorer', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900)),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                _transactionsFuture = _apiService.getTransactions();
-              });
-            },
+            onPressed: _refreshData,
           ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: const Color(0xFF10B981),
+          labelColor: const Color(0xFF10B981),
+          unselectedLabelColor: Colors.white54,
+          tabs: const [
+            Tab(text: 'TRANSACTIONS'),
+            Tab(text: 'LEDGER (BLOCS)'),
+          ],
+        ),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _transactionsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)));
-          }
-
-          final txs = snapshot.data ?? [];
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            itemCount: txs.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Transactions Scellées',
-                      style: TextStyle(color: Color(0xFF10B981), fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 2),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Audit Blockchain en Direct',
-                      style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Chaque action est enregistrée de manière immuable sur le réseau.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 16),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
-                );
-              }
-
-              final tx = txs[index - 1];
-              final isCredit = tx['type'] == 'credit';
-
-              return _buildBlockCard(
-                'Block #${18425000 + txs.length - index + 1}',
-                tx['txHash'] ?? '0x' + tx['id'].toString().padLeft(32, '0'),
-                tx['date'] ?? 'À l\'instant',
-                '${tx['amount']} FCFA',
-                isCredit ? Icons.add_chart : Icons.payments_outlined,
-              );
-            },
-          );
-        },
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildTransactionList(),
+          _buildBlockList(),
+        ],
       ),
     );
   }
 
-  Widget _buildBlockCard(String block, String hash, String time, String data, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
+  Widget _buildTransactionList() {
+    return FutureBuilder<List<dynamic>>(
+      future: _transactionsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)));
+        }
+        final txs = snapshot.data ?? [];
+        return ListView.builder(
+          padding: const EdgeInsets.all(24),
+          itemCount: txs.length,
+          itemBuilder: (context, index) {
+            final tx = txs[index];
+            final isCredit = tx['type'] == 'credit';
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+              ),
+              child: Row(
                 children: [
-                  Icon(icon, color: const Color(0xFF10B981), size: 18),
-                  const SizedBox(width: 8),
-                  Text(block, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+                  CircleAvatar(
+                    backgroundColor: isCredit ? const Color(0xFF10B981).withOpacity(0.1) : Colors.white10,
+                    child: Icon(isCredit ? Icons.add : Icons.remove, color: isCredit ? const Color(0xFF10B981) : Colors.white70),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tx['description'] ?? 'Transaction', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(tx['date'] ?? '', style: TextStyle(color: Colors.white30, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${isCredit ? '+' : '-'}${tx['amount']} F',
+                    style: TextStyle(color: isCredit ? const Color(0xFF10B981) : Colors.redAccent, fontWeight: FontWeight.w900),
+                  ),
                 ],
               ),
-              Text(time, style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12, fontWeight: FontWeight.w600)),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(12),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              'Hash: $hash',
-              style: const TextStyle(color: Color(0xFF34D399), fontSize: 11, fontFamily: 'monospace', letterSpacing: 0.5),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('CONTENU DU BLOCK', style: TextStyle(color: Colors.white30, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
-              Text(data, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
-            ],
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildBlockList() {
+    return FutureBuilder<List<dynamic>>(
+      future: _blocksFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)));
+        }
+        final blocks = snapshot.data ?? [];
+        final reversedBlocks = blocks.reversed.toList();
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(24),
+          itemCount: reversedBlocks.length,
+          itemBuilder: (context, index) {
+            final block = reversedBlocks[index];
+            return Container(
+              margin: const EdgeInsets.only(bottom: 24),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F172A),
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text('BLOC #${block['index']}', style: const TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.w900, fontSize: 12)),
+                      ),
+                      Text(
+                        DateTime.fromMillisecondsSinceEpoch(block['timestamp']).toString().split('.')[0],
+                        style: TextStyle(color: Colors.white24, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('HASH DU BLOC', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const SizedBox(height: 8),
+                  Text(block['hash'] ?? '', style: const TextStyle(color: Color(0xFF34D399), fontSize: 10, fontFamily: 'monospace')),
+                  const SizedBox(height: 16),
+                  const Text('HASH PRÉCÉDENT', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const SizedBox(height: 8),
+                  Text(block['previousHash'] ?? '', style: const TextStyle(color: Colors.white54, fontSize: 10, fontFamily: 'monospace')),
+                  const SizedBox(height: 20),
+                  const Divider(color: Colors.white10),
+                  const SizedBox(height: 12),
+                  const Text('PAYLOAD (DONNÉES)', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      const JsonEncoder.withIndent('  ').convert(block['data']),
+                      style: const TextStyle(color: Colors.blueAccent, fontSize: 9, fontFamily: 'monospace'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text('Nonce: ${block['nonce']}', style: const TextStyle(color: Colors.white12, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

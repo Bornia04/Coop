@@ -26,6 +26,13 @@ export class Blockchain {
   }
 
   /**
+   * Calcule le hash SHA-256 de données quelconques
+   */
+  static hashData(data: any): string {
+    return crypto.createHmac('sha256', this.SECRET).update(JSON.stringify(data)).digest('hex');
+  }
+
+  /**
    * Crée un nouveau bloc scellé
    */
   static createBlock(index: number, data: any, previousHash: string): Block {

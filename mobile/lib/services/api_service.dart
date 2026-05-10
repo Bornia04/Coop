@@ -50,6 +50,22 @@ class ApiService {
     }
   }
 
+  Future<List<dynamic>> getBlocks() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/blocks'),
+        headers: await _getHeaders(),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      }
+      return [];
+    } catch (e) {
+      print('Erreur API Blocks: $e');
+      return [];
+    }
+  }
+
   Future<bool> castVote(String proposalId, String voteType, String memberId) async {
     try {
       final response = await http.post(

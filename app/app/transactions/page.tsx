@@ -31,6 +31,15 @@ export default function Transactions() {
           <p className="text-slate-500 mt-2 text-lg">Visualisation des Flux Financiers de la Coopérative</p>
         </div>
         <div className="flex gap-4">
+           <Button 
+             onClick={() => {
+               const name = localStorage.getItem('user_name') || 'Admin';
+               window.open(`/app/reports/print?type=ledger&signer=${encodeURIComponent(name)}`, '_blank');
+             }}
+             className="bg-primary hover:bg-emerald-600 rounded-xl font-bold h-12 shadow-lg shadow-primary/20"
+           >
+             Exporter Ledger (PDF)
+           </Button>
            <div className="bg-white px-4 py-2 rounded-xl border border-slate-200 text-[10px] font-black uppercase space-y-1 shadow-sm">
               <p className="text-slate-400">Réseau Actif</p>
               <p className="text-primary flex items-center gap-2">🟢 Ethereum Sepolia</p>

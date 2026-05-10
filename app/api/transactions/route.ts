@@ -14,10 +14,17 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    
+    // Validation basique
+    if (!body.description || typeof body.amount !== 'number' || body.amount < 0) {
+      return NextResponse.json({ error: 'Données de transaction invalides' }, { status: 400 });
+    }
+
     const newTx = {
       ...body,
       id: 'tx' + Date.now(),
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      status: body.status || 'confirmed' // Par défaut confirmé pour la démo
     };
     addTransaction(newTx);
     return NextResponse.json(newTx);

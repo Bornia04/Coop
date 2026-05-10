@@ -62,6 +62,38 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _showNotification(String title, String body, VoidCallback onAction) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.notifications_active, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white70)),
+                  Text(body, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.white)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF10B981),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        action: SnackBarAction(
+          label: 'VOIR',
+          textColor: Colors.white,
+          onPressed: onAction,
+        ),
+      ),
+    );
+  }
+
   Future<void> _pollData() async {
     try {
       final txs = await _apiService.getTransactions();
@@ -70,32 +102,16 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         if (props.length > _lastProposalCount) {
           final newProp = props.last;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.notifications_active, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Nouvelle proposition : ${newProp['title']}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              backgroundColor: const Color(0xFF10B981),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              action: SnackBarAction(
-                label: 'VOIR',
-                textColor: Colors.white,
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const VotingScreen()));
-                },
-              ),
-            ),
-          );
+          _showNotification('Nouvelle proposition', newProp['title'], () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const VotingScreen()));
+          });
+        }
+
+        if (_transactions.isNotEmpty && txs.length > _transactions.length) {
+          final newTx = txs.first; // Les nouvelles transactions sont en haut (unshift)
+          _showNotification('Nouvelle Transaction', '${newTx['description']} : ${newTx['amount']} F', () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const ExplorerScreen()));
+          });
         }
 
         setState(() {

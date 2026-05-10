@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   const votesHeld = db.proposals.length;
   const votesApproved = db.proposals.filter((p: any) => p.status === 'approved').length;
   const avgQuorum = db.proposals.length > 0 
-    ? db.proposals.reduce((sum: number, p: any) => sum + (p.votesFor + p.votesAgainst), 0) / (db.proposals.length * 50) 
+    ? db.proposals.reduce((sum: number, p: any) => sum + (p.votesFor + p.votesAgainst), 0) / (db.proposals.length * db.users.length) 
     : 0.78; // Mocked average if no history
 
   // 3. Structure du Rapport (Alignée sur le Cahier de Charge)
@@ -45,9 +45,9 @@ export async function GET(req: Request) {
       currency: "FCFA"
     },
     membership: {
-      totalMembers: db.users.length + 42, // Simulation d'une base plus large
-      activeMembers: db.users.length + 38,
-      newMembers: 2
+      totalMembers: db.users.length,
+      activeMembers: db.users.length,
+      newMembers: 0
     },
     governance: {
       votesHeld,

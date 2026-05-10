@@ -26,7 +26,9 @@ export default function Home() {
             <Link href="/app/register">
               <Button className="h-16 px-12 rounded-2xl bg-white text-slate-950 font-black text-lg hover:scale-105 transition-transform">Démarrer maintenant</Button>
             </Link>
-            <Button variant="outline" className="h-16 px-12 rounded-2xl border-white/10 bg-white/5 font-black text-lg hover:bg-white/10">Explorer le Ledger</Button>
+            <Link href="/app/transactions">
+              <Button variant="outline" className="h-16 px-12 rounded-2xl border-white/10 bg-white/5 font-black text-lg hover:bg-white/10">Explorer le Ledger</Button>
+            </Link>
           </div>
         </div>
       </section>

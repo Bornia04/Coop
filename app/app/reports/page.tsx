@@ -28,7 +28,15 @@ export default function ReportsPage() {
         </div>
         <div className="flex gap-4">
            <Button variant="outline" className="rounded-xl border-slate-200 font-bold h-12">Exporter CSV</Button>
-           <Button className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20">Télécharger PDF Certifié</Button>
+           <Button 
+             onClick={() => {
+               const name = localStorage.getItem('user_name') || 'Admin';
+               window.open(`/app/reports/print?type=monthly&signer=${encodeURIComponent(name)}`, '_blank');
+             }}
+             className="rounded-xl font-bold h-12 px-8 shadow-lg shadow-primary/20"
+           >
+             Télécharger PDF Certifié
+           </Button>
         </div>
       </div>
 

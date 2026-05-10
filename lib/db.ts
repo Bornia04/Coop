@@ -103,33 +103,29 @@ function readDB() {
 
   let db: any;
   if (!fs.existsSync(DB_PATH)) {
-    db = INITIAL_DATA;
+    db = { ...INITIAL_DATA };
   } else {
     const content = fs.readFileSync(DB_PATH, 'utf-8');
-    if (!content || content.trim() === '') {
-      db = INITIAL_DATA;
-    } else {
-      try {
-        db = JSON.parse(content);
-      } catch (e) {
-        db = INITIAL_DATA;
-      }
+    try {
+      db = content && content.trim() !== '' ? JSON.parse(content) : { ...INITIAL_DATA };
+    } catch (e) {
+      db = { ...INITIAL_DATA };
     }
   }
 
-  // Auto-conclusion des votes expriés
+  // Assurer l'existence de toutes les tables
+  db.users = db.users || INITIAL_DATA.users;
+  db.transactions = db.transactions || [];
+  db.proposals = db.proposals || [];
+  db.blocks = db.blocks || [];
+  db.equipment = db.equipment || [];
+  db.alerts = db.alerts || [];
+  db.equipmentStats = db.equipmentStats || [];
+
+  // Auto-conclusion des votes expirés
   let changed = false;
   const now = new Date();
   
-  // Initialize db tables if missing
-  if (!db.users) db.users = INITIAL_DATA.users;
-  if (!db.transactions) db.transactions = [];
-  if (!db.proposals) db.proposals = [];
-  if (!db.blocks) db.blocks = [];
-  if (!db.equipment) db.equipment = [];
-  if (!db.alerts) db.alerts = [];
-  if (!db.equipmentStats) db.equipmentStats = [];
-
   db.proposals.forEach((p: Proposal) => {
     if (p.status === 'active' && p.expiresAt && new Date(p.expiresAt) < now) {
       p.status = p.votesFor >= p.votesAgainst ? 'approved' : 'rejected';
@@ -167,12 +163,6 @@ function readDB() {
   if (changed || !fs.existsSync(DB_PATH)) {
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
   }
-
-  // Garantie que les tables critiques existent
-  if (!db.users) db.users = INITIAL_DATA.users;
-  if (!db.transactions) db.transactions = [];
-  if (!db.proposals) db.proposals = [];
-  if (!db.blocks) db.blocks = [];
 
   return db;
 }
@@ -251,9 +241,9 @@ export const castVote = (proposalId: string, vote: 'for' | 'against', memberId: 
   
   p.votes.push({ memberId, vote, txHash });
 
-  // 3. Logique de conclusion immédiate si quorum atteint (optionnel)
+  // 3. Logique de conclusion immédiate si quorum atteint
   const totalVotes = p.votesFor + p.votesAgainst;
-  if (totalVotes >= 150) { 
+  if (totalVotes >= db.users.length) { 
     p.status = p.votesFor > p.votesAgainst ? 'approved' : 'rejected';
   }
 

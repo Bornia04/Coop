@@ -14,6 +14,12 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Validation basique
+    if (!body.title || !body.description || typeof body.amount !== 'number') {
+      return NextResponse.json({ error: 'Données de proposition invalides' }, { status: 400 });
+    }
+
     const newProposal = {
       ...body,
       id: 'p' + Date.now(),
