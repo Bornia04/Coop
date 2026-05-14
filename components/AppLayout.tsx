@@ -165,6 +165,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="p-6 lg:p-10 flex-1">
           {children}
         </main>
+      </div>
     </div>
   );
 }
