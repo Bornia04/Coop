@@ -49,6 +49,12 @@ export default function Proposals() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      window.location.href = '/app/login';
+      return;
+    }
+
     fetchProposals();
     const interval = setInterval(fetchProposals, 2000); // Polling ultra-rapide pour la démo (2s)
     return () => clearInterval(interval);

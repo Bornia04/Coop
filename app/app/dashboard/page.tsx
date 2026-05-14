@@ -18,6 +18,12 @@ export default function Dashboard() {
   const [lastPropCount, setLastPropCount] = useState(0);
 
   useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      window.location.href = '/app/login';
+      return;
+    }
+
     setUserName(localStorage.getItem('user_name') || 'Membre');
     setUserRole(localStorage.getItem('user_role') || 'membre');
 

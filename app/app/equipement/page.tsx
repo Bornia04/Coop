@@ -13,6 +13,11 @@ export default function EquipmentPage() {
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      window.location.href = '/app/login';
+      return;
+    }
     setUserRole(localStorage.getItem('user_role') || 'membre');
   }, []);
 
