@@ -26,16 +26,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     { href: '/app/settings', label: 'Paramètres', icon: IconSettings, roles: ['president', 'tresorier', 'membre'] },
   ];
 
+  const isAuthPage = pathname === '/app/login' || pathname === '/app/register';
+
   useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+
+    if (!token && !isAuthPage) {
+      window.location.href = '/app/login';
+      return;
+    }
+
     try {
       const name = localStorage.getItem('user_name');
       const role = localStorage.getItem('user_role');
-      const token = localStorage.getItem('auth_token');
-
-      if (!token && pathname !== '/app/login' && pathname !== '/app/register') {
-        router.push('/app/login');
-      }
-
       if (name) setUserName(name);
       if (role) setUserRole(role);
     } catch (e) {
@@ -43,24 +46,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoaded(true);
     }
-  }, [pathname, router]);
+  }, [pathname, isAuthPage]);
 
   const handleLogout = () => {
     localStorage.clear();
-    router.push('/app/login');
+    window.location.href = '/app/login';
   };
 
-  const isAuthPage = pathname === '/app/login' || pathname === '/app/register';
   if (isAuthPage) return <>{children}</>;
   
-  if (!isLoaded) return (
-    <div className="flex min-h-screen bg-[#020617] items-center justify-center">
-      <div className="text-center">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-primary font-black uppercase tracking-widest text-xs">Initialisation CoopLedger...</p>
-      </div>
-    </div>
-  );
+  if (!isLoaded) return null; // On ne montre rien du tout tant qu'on n'est pas sûr de l'identité
 
   return (
     <div className="flex min-h-screen bg-slate-50">
