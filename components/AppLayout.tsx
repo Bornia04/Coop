@@ -27,17 +27,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   ];
 
   useEffect(() => {
-    const name = localStorage.getItem('user_name');
-    const role = localStorage.getItem('user_role');
-    const token = localStorage.getItem('auth_token');
+    try {
+      const name = localStorage.getItem('user_name');
+      const role = localStorage.getItem('user_role');
+      const token = localStorage.getItem('auth_token');
 
-    if (!token && pathname !== '/app/login' && pathname !== '/app/register') {
-      router.push('/app/login');
+      if (!token && pathname !== '/app/login' && pathname !== '/app/register') {
+        router.push('/app/login');
+      }
+
+      if (name) setUserName(name);
+      if (role) setUserRole(role);
+    } catch (e) {
+      console.error("Auth initialization error:", e);
+    } finally {
+      setIsLoaded(true);
     }
-
-    if (name) setUserName(name);
-    if (role) setUserRole(role);
-    setIsLoaded(true);
   }, [pathname, router]);
 
   const handleLogout = () => {
@@ -47,7 +52,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const isAuthPage = pathname === '/app/login' || pathname === '/app/register';
   if (isAuthPage) return <>{children}</>;
-  if (!isLoaded) return null;
+  
+  if (!isLoaded) return (
+    <div className="flex min-h-screen bg-[#020617] items-center justify-center">
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-primary font-black uppercase tracking-widest text-xs">Initialisation CoopLedger...</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen bg-slate-50">
