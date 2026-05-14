@@ -85,19 +85,19 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 p-1">
       {/* Header avec Profil */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-[32px] shadow-sm border border-slate-100">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-[32px] shadow-sm border border-slate-100 gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-xl">
+          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-xl flex-shrink-0">
             {userName?.[0] || 'M'}
           </div>
           <div>
-            <h2 className="text-xl font-black text-slate-900 leading-none">
+            <h2 className="text-lg md:text-xl font-black text-slate-900 leading-tight">
               Bienvenue {userRole === 'president' ? 'Président' : (userRole === 'tresorier' ? 'Trésorier' : 'Membre')} {userName}
             </h2>
             <p className="text-[10px] font-black uppercase tracking-widest text-primary mt-1">Accès {userRole}</p>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
            {userRole === 'president' && (
              <Button 
                 onClick={async () => {
@@ -111,16 +111,20 @@ export default function Dashboard() {
                     }
                   }
                 }}
-                className="bg-amber-500 hover:bg-amber-600 rounded-xl font-bold text-white shadow-lg shadow-amber-200"
+                className="bg-amber-500 hover:bg-amber-600 rounded-xl font-bold text-white shadow-lg shadow-amber-200 text-xs py-2 h-auto"
               >
-                Distribuer Primes
+                Primes
               </Button>
            )}
-           <div className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border border-emerald-100">
+           <div className="bg-emerald-50 text-emerald-600 px-3 py-2 rounded-xl text-[10px] font-bold flex items-center gap-2 border border-emerald-100">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              Node Online • {blocks.length} Blocs
+              {blocks.length} Blocs
            </div>
-           <Button variant="outline" className="rounded-xl font-bold" onClick={() => { localStorage.clear(); window.location.href = '/app/login'; }}>
+           <Button 
+             variant="outline" 
+             className="rounded-xl font-bold text-xs py-2 h-auto" 
+             onClick={() => { localStorage.clear(); window.location.href = '/app/login'; }}
+           >
              Déconnexion
            </Button>
         </div>

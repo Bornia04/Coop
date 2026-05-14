@@ -21,41 +21,41 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-primary selection:text-white overflow-x-hidden pt-20">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-32 px-6 min-h-[90vh] flex items-center overflow-hidden">
+      <section className="relative pt-12 md:pt-20 pb-20 md:pb-32 px-4 md:px-6 min-h-[80vh] md:min-h-[90vh] flex items-center overflow-hidden">
         {/* Background Image with Overlay - Smaller size to see the full circle of hands */}
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
           style={{ 
             backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.75), rgba(2, 6, 23, 0.9)), url("/imageaccueil.jpeg"), url("https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop")',
-            filter: 'contrast(1.25) saturate(1.2) brightness(0.95) sharpen(1.2)'
+            filter: 'contrast(1.25) saturate(1.2) brightness(0.95)'
           }}
         ></div>
         
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full z-10 opacity-30"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full md:w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full z-10 opacity-30"></div>
         <div className="max-w-7xl mx-auto text-center relative z-20">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Mainnet Local Actif</span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-none animate-fade-in-up">
-            La Confiance <span className="text-primary italic">Immuable</span> <br /> pour l'Agriculture.
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-black mb-6 md:mb-8 tracking-tighter leading-[1.1] md:leading-none animate-fade-in-up">
+            La Confiance <span className="text-primary italic">Immuable</span> <br className="hidden sm:block" /> pour l'Agriculture.
           </h1>
-          <p className="text-xl text-white/60 max-w-2xl mx-auto mb-12 font-medium animate-fade-in-up delay-100">
+          <p className="text-base md:text-xl text-white/60 max-w-2xl mx-auto mb-10 md:mb-12 font-medium animate-fade-in-up delay-100 px-4">
             Révolutionnez la gestion de votre coopérative avec la puissance de la blockchain. 
             Transparence totale, gouvernance participative et sécurité SHA-256.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up delay-200">
+          <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center animate-fade-in-up delay-200 px-6">
             <Button 
               onClick={() => handleNavigation('/app/dashboard')}
-              className="rounded-xl h-14 px-10 font-black text-lg shadow-2xl shadow-primary/20"
+              className="rounded-xl h-14 px-10 font-black text-lg shadow-2xl shadow-primary/20 w-full sm:w-auto"
             >
               Démarrer maintenant
             </Button>
             <Button 
               onClick={() => handleNavigation('/app/transactions')}
               variant="ghost" 
-              className="rounded-xl h-14 px-8 font-black text-white/60 hover:text-white hover:bg-white/5 border border-white/10"
+              className="rounded-xl h-14 px-8 font-black text-white/60 hover:text-white hover:bg-white/5 border border-white/10 w-full sm:w-auto"
             >
               Explorer le Ledger
             </Button>

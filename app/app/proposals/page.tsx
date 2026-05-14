@@ -64,13 +64,13 @@ export default function Proposals() {
 
   return (
     <div className="space-y-10 p-1">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Gouvernance <span className="text-primary">Participative</span></h1>
-          <p className="text-slate-500 mt-2 text-lg">Participez aux décisions stratégiques de la coopérative</p>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Gouvernance <span className="text-primary">Participative</span></h1>
+          <p className="text-slate-500 mt-2 text-base md:text-lg">Participez aux décisions stratégiques de la coopérative</p>
         </div>
-        <Link href="/app/proposals/new">
-          <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20">+ Créer une Proposition</Button>
+        <Link href="/app/proposals/new" className="w-full md:w-auto">
+          <Button className="rounded-xl h-12 px-8 font-bold shadow-lg shadow-primary/20 w-full">+ Créer</Button>
         </Link>
       </div>
 

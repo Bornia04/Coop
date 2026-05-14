@@ -45,45 +45,45 @@ export default function Transactions() {
 
   return (
     <div className="space-y-8 p-1">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Historique <span className="text-primary">Coop</span></h1>
-          <p className="text-slate-500 mt-2 text-lg">Visualisation des Flux Financiers de la Coopérative</p>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Historique <span className="text-primary">Coop</span></h1>
+          <p className="text-slate-500 mt-2 text-base md:text-lg">Visualisation des Flux Financiers de la Coopérative</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto">
            <Button 
              onClick={runAudit}
              disabled={auditing}
-             className={`${auditing ? 'bg-slate-100 animate-pulse' : 'bg-slate-900'} text-white rounded-xl font-bold h-12 shadow-lg px-6 flex gap-2`}
+             className={`${auditing ? 'bg-slate-100 animate-pulse' : 'bg-slate-900'} text-white rounded-xl font-bold h-12 shadow-lg px-6 flex-1 md:flex-none flex gap-2 text-xs md:text-sm`}
            >
-             {auditing ? 'Audit en cours...' : (auditResult === 'success' ? '✓ Audit Réussi' : '🛡️ Lancer Audit Ledger')}
+             {auditing ? 'Audit...' : (auditResult === 'success' ? '✓ Succès' : '🛡️ Audit Ledger')}
            </Button>
            <Button 
              onClick={() => {
                const name = localStorage.getItem('user_name') || 'Admin';
                window.open(`/app/reports/print?type=ledger&signer=${encodeURIComponent(name)}`, '_blank');
              }}
-             className="bg-primary hover:bg-emerald-600 rounded-xl font-bold h-12 shadow-lg shadow-primary/20"
+             className="bg-primary hover:bg-emerald-600 rounded-xl font-bold h-12 shadow-lg shadow-primary/20 flex-1 md:flex-none text-xs md:text-sm"
            >
-             Exporter Ledger (PDF)
+             Export PDF
            </Button>
         </div>
       </div>
 
       {auditResult === 'success' && (
-        <div className="bg-emerald-50 border-2 border-emerald-500/20 p-6 rounded-[24px] flex items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="bg-emerald-50 border-2 border-emerald-500/20 p-4 md:p-6 rounded-[24px] flex flex-col md:flex-row items-start md:items-center justify-between animate-in fade-in slide-in-from-top-4 duration-500 gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+            <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-emerald-200 flex-shrink-0">
                <IconShield size={24} />
             </div>
             <div>
-              <p className="font-black text-emerald-900 uppercase tracking-tight">Certification d'Intégrité Blockchain</p>
-              <p className="text-emerald-600 text-xs font-bold uppercase tracking-widest">Tous les blocs sont scellés et valides • {blocks.length} Blocs vérifiés</p>
+              <p className="font-black text-emerald-900 uppercase tracking-tight text-sm md:text-base">Certification d'Intégrité</p>
+              <p className="text-emerald-600 text-[10px] font-bold uppercase tracking-widest leading-tight">{blocks.length} Blocs vérifiés et scellés</p>
             </div>
           </div>
-          <div className="text-right">
-             <p className="text-[10px] font-black text-emerald-800/40 uppercase">Hash Root (Merkle)</p>
-             <p className="font-mono text-[10px] text-emerald-700 font-bold">{blocks[blocks.length-1]?.hash?.substring(0, 32)}...</p>
+          <div className="text-left md:text-right w-full md:w-auto border-t md:border-none pt-2 md:pt-0">
+             <p className="text-[8px] md:text-[10px] font-black text-emerald-800/40 uppercase">Hash Root (Merkle)</p>
+             <p className="font-mono text-[9px] md:text-[10px] text-emerald-700 font-bold truncate max-w-[200px] md:max-w-none">{blocks[blocks.length-1]?.hash}</p>
           </div>
         </div>
       )}
@@ -92,14 +92,14 @@ export default function Transactions() {
           <Button 
             variant={view === 'tx' ? 'default' : 'ghost'} 
             onClick={() => setView('tx')}
-            className="rounded-lg font-bold"
+            className="rounded-lg font-bold text-xs"
           >
             Transactions
           </Button>
           <Button 
             variant={view === 'blocks' ? 'default' : 'ghost'} 
             onClick={() => setView('blocks')}
-            className="rounded-lg font-bold"
+            className="rounded-lg font-bold text-xs"
           >
             Blocs Bruts
           </Button>
@@ -107,8 +107,8 @@ export default function Transactions() {
 
       {view === 'tx' ? (
         <Card className="border-none shadow-xl rounded-[32px] overflow-hidden">
-          <CardContent className="p-0">
-            <table className="w-full">
+          <CardContent className="p-0 overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
                   <th className="text-left p-6 text-[10px] font-black uppercase text-slate-400">Date</th>

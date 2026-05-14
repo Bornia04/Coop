@@ -15,6 +15,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState('membre');
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const links = [
     { href: '/app/dashboard', label: 'Tableau de bord', icon: IconDashboard, roles: ['president', 'tresorier', 'membre'] },
     { href: '/app/transactions', label: 'Transactions', icon: IconTransactions, roles: ['president', 'tresorier', 'membre'] },
@@ -48,6 +50,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, isAuthPage]);
 
+  // Fermer la sidebar lors du changement de page sur mobile
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [pathname]);
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = '/app/login';
@@ -55,22 +62,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (isAuthPage) return <>{children}</>;
   
-  if (!isLoaded) return null; // On ne montre rien du tout tant qu'on n'est pas sûr de l'identité
+  if (!isLoaded) return null;
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* Sidebar Élégante */}
-      <aside className="w-72 bg-[#020617] text-white flex flex-col fixed h-screen z-50 shadow-2xl">
-        <div className="p-8">
+    <div className="flex min-h-screen bg-slate-50 relative">
+      {/* Overlay Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      {/* Sidebar Élégante - Responsive */}
+      <aside className={`w-72 bg-[#020617] text-white flex flex-col fixed h-screen z-[60] shadow-2xl transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="p-8 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                <IconShield size={24} color="white" />
             </div>
             <span className="text-xl font-black tracking-tighter">CoopLedger</span>
           </Link>
+          <button className="lg:hidden text-slate-400" onClick={() => setIsSidebarOpen(false)}>
+            ✕
+          </button>
         </div>
 
-        <nav className="flex-1 px-4 space-y-1">
+        <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
           <p className="px-4 text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-4">Menu Principal</p>
           {links.filter(l => l.roles.includes(userRole.toLowerCase())).map((link) => {
             const active = pathname === link.href;
@@ -87,12 +105,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-6 mt-auto">
-          <div className="bg-white/5 p-4 rounded-2xl border border-white/5 mb-4">
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/5 mb-4 hidden sm:block">
              <div className="flex items-center gap-3 mb-2">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Blockchain Sync</span>
              </div>
-             <p className="text-[10px] text-slate-500 leading-tight">Nœud local actif. Transactions scellées par SHA-256.</p>
+             <p className="text-[10px] text-slate-500 leading-tight">Transactions scellées par SHA-256.</p>
           </div>
           <Button 
             onClick={handleLogout}
@@ -105,17 +123,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-72 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-72 transition-all duration-300">
         {/* Navbar Supérieure */}
-        <header className="h-20 bg-white/70 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-40 px-10 flex items-center justify-between">
-           <div>
-             <h2 className="text-sm font-black text-slate-400 uppercase tracking-widest">
+        <header className="h-20 bg-white/70 backdrop-blur-md border-b border-slate-200/60 sticky top-0 z-40 px-6 lg:px-10 flex items-center justify-between">
+           <div className="flex items-center gap-4">
+             <button 
+               onClick={() => setIsSidebarOpen(true)}
+               className="p-2 bg-slate-100 rounded-xl text-slate-600 lg:hidden"
+             >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+             </button>
+             <h2 className="text-xs font-black text-slate-400 uppercase tracking-widest">
                {links.find(l => l.href === pathname)?.label || 'Aperçu'}
              </h2>
            </div>
 
-           <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
+           <div className="flex items-center gap-3 lg:gap-6">
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-100 rounded-full">
                  <div className="w-2 h-2 bg-primary rounded-full"></div>
                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">Demo Mode</span>
               </div>
@@ -125,7 +149,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-[8px] font-bold text-white rounded-full flex items-center justify-center">3</span>
               </button>
               
-              <div className="flex items-center gap-4 pl-6 border-l border-slate-200">
+              <div className="flex items-center gap-3 lg:gap-4 lg:pl-6 lg:border-l lg:border-slate-200">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-bold text-slate-900 leading-none">{userName}</p>
                   <p className="text-[10px] font-black text-primary uppercase tracking-widest mt-1">{userRole}</p>
@@ -138,10 +162,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="p-10 flex-1">
+        <main className="p-6 lg:p-10 flex-1">
           {children}
         </main>
-      </div>
     </div>
   );
 }
