@@ -49,7 +49,7 @@ export default function Login() {
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)), url("https://images.unsplash.com/photo-1592982537447-7440770cbfc9?q=80&w=2070&auto=format&fit=crop")' }}
+        style={{ backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)), url("https://media.gettyimages.com/id/510304325/photo/group-of-people-holding-plant-in-soil.jpg?s=2048x2048&w=gi&k=20&c=Z_z7_S6_8Z_9_0_1_2_3_4_5_6_7_8_9_0_1_2_3_4")' }}
       ></div>
 
       <div className="w-full max-w-[520px] space-y-8 relative z-10">

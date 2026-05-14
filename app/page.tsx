@@ -4,6 +4,15 @@ import { Button } from '@/components/ui/button';
 import { IconShield, IconTractor, IconGouvernance, IconTransactions } from '@/components/Icons';
 
 export default function Home() {
+  const handleNavigation = (path: string) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+    if (!token) {
+      window.location.href = '/app/login';
+    } else {
+      window.location.href = path;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-primary selection:text-white overflow-x-hidden pt-20">
       {/* Hero Section */}
@@ -20,21 +29,28 @@ export default function Home() {
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Mainnet Local Actif</span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[1.1] mb-8">
-            La Confiance <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">Immuable</span> <br />
-            pour l'Agriculture.
+          <h1 className="text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-none animate-fade-in-up">
+            La Confiance <span className="text-primary italic">Immuable</span> <br /> pour l'Agriculture.
           </h1>
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-white/50 font-medium leading-relaxed mb-12">
+          <p className="text-xl text-white/60 max-w-2xl mx-auto mb-12 font-medium animate-fade-in-up delay-100">
             Révolutionnez la gestion de votre coopérative avec la puissance de la blockchain. 
             Transparence totale, gouvernance participative et sécurité SHA-256.
           </p>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-            <Link href="/app/register">
-              <Button className="h-16 px-12 rounded-2xl bg-white text-slate-950 font-black text-lg hover:scale-105 transition-transform">Démarrer maintenant</Button>
-            </Link>
-            <Link href="/app/transactions">
-              <Button variant="outline" className="h-16 px-12 rounded-2xl border-white/10 bg-white/5 font-black text-lg hover:bg-white/10">Explorer le Ledger</Button>
-            </Link>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in-up delay-200">
+            <Button 
+              onClick={() => handleNavigation('/app/dashboard')}
+              className="rounded-xl h-14 px-10 font-black text-lg shadow-2xl shadow-primary/20"
+            >
+              Démarrer maintenant
+            </Button>
+            <Button 
+              onClick={() => handleNavigation('/app/transactions')}
+              variant="ghost" 
+              className="rounded-xl h-14 px-8 font-black text-white/60 hover:text-white hover:bg-white/5 border border-white/10"
+            >
+              Explorer le Ledger
+            </Button>
           </div>
         </div>
       </section>
