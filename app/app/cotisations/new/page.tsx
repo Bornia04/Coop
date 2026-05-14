@@ -13,12 +13,17 @@ export default function NewCotisation() {
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const userRole = typeof window !== 'undefined' ? localStorage.getItem('user_role') : null;
+  const isPresident = userRole === 'president';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const userRole = localStorage.getItem('user_role');
+      const isPresident = userRole === 'president';
+
       const res = await fetch('/api/transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,7 +34,8 @@ export default function NewCotisation() {
           category: formData.category,
           from: formData.member,
           to: 'Coopérative',
-          status: 'pending' // En attente de signature du président
+          status: isPresident ? 'completed' : 'pending',
+          signature: isPresident ? 'Certifié Président' : null
         }),
       });
 
@@ -53,14 +59,16 @@ export default function NewCotisation() {
           </div>
           <CardTitle className="text-3xl font-black">Enregistrer une Cotisation</CardTitle>
           <CardDescription>
-            Use Case 1 : Saisie par le Trésorier pour validation multi-sig.
+            Enregistrement sécurisé des cotisations pour validation multi-sig.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {success && (
               <div className="bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-sm font-bold border border-emerald-100">
-                Transaction enregistrée avec succès ! En attente de signature du Président.
+                {isPresident 
+                  ? 'Transaction certifiée et inscrite au Ledger avec succès !' 
+                  : 'Transaction enregistrée ! En attente de signature du Président.'}
               </div>
             )}
             <div className="space-y-2">
@@ -101,10 +109,12 @@ export default function NewCotisation() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-black shadow-xl shadow-primary/20" disabled={loading}>
-              {loading ? 'Traitement...' : 'Valider et Signer (Trésorier)'}
+              {loading ? 'Traitement...' : 'Valider et Signer'}
             </Button>
             <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-tighter">
-              Cette transaction sera envoyée au Président pour scellage final.
+              {isPresident 
+                ? 'Signature immédiate via clé privée Présidentielle.' 
+                : 'Cette transaction sera envoyée au Président pour scellage final.'}
             </p>
           </CardFooter>
         </form>

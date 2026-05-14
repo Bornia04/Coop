@@ -78,10 +78,10 @@ export default function AdminValidate() {
               <div className="text-right flex items-center gap-8">
                  <div className="space-y-1">
                     <p className="text-3xl font-black text-slate-900">{t.amount.toLocaleString()} <span className="text-sm opacity-40 font-medium">FCFA</span></p>
-                    <p className="text-[10px] font-black text-amber-500 uppercase flex items-center justify-end gap-1">
+                    <div className="text-[10px] font-black text-amber-500 uppercase flex items-center justify-end gap-1">
                        <div className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></div>
                        Signature requise
-                    </p>
+                    </div>
                  </div>
                  <Button 
                    className="h-14 px-8 rounded-2xl font-black shadow-lg shadow-primary/20"

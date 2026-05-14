@@ -35,7 +35,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     .map((t: any) => ({
       ...t,
       blockHash: t.txHash,
-      signature: t.signature || 'Signé Trésorier'
+      signature: t.signature || 'Certifié Ledger'
     }));
 
   return NextResponse.json({
