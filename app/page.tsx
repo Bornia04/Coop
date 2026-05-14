@@ -22,10 +22,13 @@ export default function Home() {
     <div className="min-h-screen bg-[#020617] text-white selection:bg-primary selection:text-white overflow-x-hidden pt-20">
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 px-6 min-h-[90vh] flex items-center overflow-hidden">
-        {/* Background Image with Overlay - Stronger overlay to reduce dominance */}
+        {/* Background Image with Overlay - Smaller size to see the full circle of hands */}
         <div 
-          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
-          style={{ backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.9), rgba(2, 6, 23, 0.95)), url("/hero-bg.jpg"), url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=2070&auto=format&fit=crop")' }}
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{ 
+            backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.75), rgba(2, 6, 23, 0.9)), url("/imageaccueil.jpeg"), url("https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop")',
+            filter: 'contrast(1.25) saturate(1.2) brightness(0.95) sharpen(1.2)'
+          }}
         ></div>
         
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full z-10 opacity-30"></div>

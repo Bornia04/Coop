@@ -46,10 +46,13 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#020617] px-4 relative overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Image with Overlay - Full screen cover */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)), url("/hero-bg.jpg"), url("https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=2070&auto=format&fit=crop")' }}
+        style={{ 
+          backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.75), rgba(2, 6, 23, 0.9)), url("/imageaccueil.jpeg"), url("https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop")',
+          filter: 'contrast(1.25) saturate(1.2) brightness(0.95)'
+        }}
       ></div>
 
       <div className="w-full max-w-[520px] space-y-8 relative z-10">

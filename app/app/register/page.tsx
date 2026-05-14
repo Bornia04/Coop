@@ -47,8 +47,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#022C22] px-4">
-      <div className="w-full max-w-[480px] space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#020617] px-4 relative overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ 
+          backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.75), rgba(2, 6, 23, 0.9)), url("/imageaccueil.jpeg"), url("https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=2070&auto=format&fit=crop")',
+          filter: 'contrast(1.25) saturate(1.2) brightness(0.95)'
+        }}
+      ></div>
+
+      <div className="w-full max-w-[480px] space-y-8 relative z-10">
         <div className="text-center">
           <Link href="/" className="text-4xl font-black text-primary tracking-tighter">CoopLedger</Link>
           <p className="text-white/60 mt-2 font-medium">Rejoignez la coopérative décentralisée</p>
