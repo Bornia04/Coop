@@ -92,7 +92,18 @@ const INITIAL_DATA = {
     { label: 'UTILITAIRES', val: '9', icon: '🛻' },
     { label: 'OUTILS DIVERS', val: '52', icon: '🔧' }
   ],
-  blocks: []
+  blocks: [
+    { 
+      index: 0, timestamp: 1714550400000, 
+      data: { type: 'GENESIS', content: 'CoopLedger Genesis Block' }, 
+      previousHash: '0', hash: '00000xGENESIS_BLOCK_DATA_HASH_SECURE', nonce: 42 
+    },
+    { 
+      index: 1, timestamp: 1714636800000, 
+      data: { type: 'TRANSACTION', content: 'Initial Capital Injection' }, 
+      previousHash: '00000xGENESIS_BLOCK_DATA_HASH_SECURE', hash: '00000xINITIAL_DEPOSIT_HASH_V1', nonce: 128 
+    }
+  ]
 };
 
 function readDB() {
@@ -113,14 +124,14 @@ function readDB() {
     }
   }
 
-  // Assurer l'existence de toutes les tables
-  db.users = db.users || INITIAL_DATA.users;
-  db.transactions = db.transactions || [];
-  db.proposals = db.proposals || [];
-  db.blocks = db.blocks || [];
-  db.equipment = db.equipment || [];
-  db.alerts = db.alerts || [];
-  db.equipmentStats = db.equipmentStats || [];
+  // Assurer l'existence de toutes les tables avec données de secours si vides
+  db.users = (db.users && db.users.length > 0) ? db.users : INITIAL_DATA.users;
+  db.transactions = (db.transactions && db.transactions.length > 0) ? db.transactions : INITIAL_DATA.transactions;
+  db.proposals = (db.proposals && db.proposals.length > 0) ? db.proposals : INITIAL_DATA.proposals;
+  db.blocks = (db.blocks && db.blocks.length > 0) ? db.blocks : INITIAL_DATA.blocks;
+  db.equipment = (db.equipment && db.equipment.length > 0) ? db.equipment : INITIAL_DATA.equipment;
+  db.alerts = (db.alerts && db.alerts.length > 0) ? db.alerts : INITIAL_DATA.alerts;
+  db.equipmentStats = (db.equipmentStats && db.equipmentStats.length > 0) ? db.equipmentStats : INITIAL_DATA.equipmentStats;
 
   // Auto-conclusion des votes expirés
   let changed = false;
