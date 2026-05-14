@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-const DB_PATH = path.join(process.cwd(), 'db.json');
+// On cherche le db.json à la racine du projet CoopLedger
+const DB_PATH = path.resolve(process.cwd(), 'db.json');
 
 export interface Transaction {
   id: string;

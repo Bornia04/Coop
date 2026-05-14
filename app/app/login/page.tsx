@@ -45,8 +45,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#022C22] px-4">
-      <div className="w-full max-w-[520px] space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#020617] px-4 relative overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)), url("/hero-bg.jpg")' }}
+      ></div>
+
+      <div className="w-full max-w-[520px] space-y-8 relative z-10">
         <div className="text-center">
           <Link href="/" className="text-4xl font-black text-primary tracking-tighter">CoopLedger</Link>
           <p className="text-white/60 mt-2 font-medium">Accès Sécurisé à la Coopérative</p>

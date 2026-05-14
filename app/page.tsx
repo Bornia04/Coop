@@ -7,9 +7,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#020617] text-white selection:bg-primary selection:text-white overflow-x-hidden pt-20">
       {/* Hero Section */}
-      <section className="relative pt-20 pb-20 px-6">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full -z-10 opacity-30"></div>
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="relative pt-20 pb-32 px-6 min-h-[90vh] flex items-center overflow-hidden">
+        {/* Background Image with Overlay */}
+        <div 
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 hover:scale-105"
+          style={{ backgroundImage: 'linear-gradient(to bottom, rgba(2, 6, 23, 0.8), rgba(2, 6, 23, 0.9)), url("/hero-bg.jpg")' }}
+        ></div>
+        
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-primary/20 blur-[120px] rounded-full z-10 opacity-30"></div>
+        <div className="max-w-7xl mx-auto text-center relative z-20">
           <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full mb-8 animate-fade-in">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">Mainnet Local Actif</span>
