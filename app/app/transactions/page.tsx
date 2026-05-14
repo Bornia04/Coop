@@ -12,17 +12,6 @@ export default function Transactions() {
   const [auditing, setAuditing] = useState(false);
   const [auditResult, setAuditResult] = useState<'success' | 'error' | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      fetch('/api/transactions').then(res => res.json()),
-      fetch('/api/blocks').then(res => res.json())
-    ]).then(([txData, blockData]) => {
-      setTransactions(txData);
-      setBlocks(blockData);
-      setLoading(false);
-    });
-  }, []);
-
   const runAudit = () => {
     setAuditing(true);
     setAuditResult(null);
@@ -34,6 +23,23 @@ export default function Transactions() {
       setAuditResult('success');
     }, 2500);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      window.location.href = '/app/login';
+      return;
+    }
+
+    Promise.all([
+      fetch('/api/transactions').then(res => res.json()),
+      fetch('/api/blocks').then(res => res.json())
+    ]).then(([txData, blockData]) => {
+      setTransactions(txData);
+      setBlocks(blockData);
+      setLoading(false);
+    });
+  }, []);
 
   if (loading) return <div className="flex h-full items-center justify-center text-primary font-black uppercase">Vérification de l'intégrité...</div>;
 

@@ -46,9 +46,12 @@ export interface Proposal {
 
 const INITIAL_DATA = {
   users: [
-    { id: 'u1', email: 'president@coop.com', name: 'Jean Dupont', role: 'president', passwordHash: 'demo-salt:8f457f461f185cc8933ddac481e5a18d0e32a73b4d8c03cec38c8c4c881669296fb6ea4508c6cd61e3b7cf0e8f9331139742f050355baa64487d962fa9631870' },
-    { id: 'u2', email: 'tresorier@coop.com', name: 'Marie Curie', role: 'tresorier', passwordHash: 'demo-salt:8f457f461f185cc8933ddac481e5a18d0e32a73b4d8c03cec38c8c4c881669296fb6ea4508c6cd61e3b7cf0e8f9331139742f050355baa64487d962fa9631870' },
-    { id: 'u3', email: 'membre@coop.com', name: 'Paul Valéry', role: 'membre', passwordHash: 'demo-salt:8f457f461f185cc8933ddac481e5a18d0e32a73b4d8c03cec38c8c4c881669296fb6ea4508c6cd61e3b7cf0e8f9331139742f050355baa64487d962fa9631870' }
+    { id: 'u1', email: 'president@coop.com', name: 'Jean Dupont', role: 'president', passwordHash: '123' },
+    { id: 'u2', email: 'tresorier@coop.com', name: 'Marie Curie', role: 'tresorier', passwordHash: '123' },
+    { id: 'u3', email: 'membre@coop.com', name: 'Paul Valéry', role: 'membre', passwordHash: '123' },
+    { id: 'vlad', email: 'vlad@gmail.com', name: 'Vladmir', role: 'president', passwordHash: '123' },
+    { id: 'the', email: 'the@gmail.com', name: 'Théodore', role: 'tresorier', passwordHash: '123' },
+    { id: 'prevo', email: 'prevo@gmail.com', name: 'Prévost', role: 'membre', passwordHash: '123' }
   ],
   transactions: [
     { id: 'tx_20', date: '2024-04-10', description: "Vente Riz - Coopérative de la Vallée", amount: 4200000, type: 'credit', category: 'Ventes', txHash: '0xBC_RIZ_2024_001', status: 'confirmed', from: 'Acheteur Global', to: 'Coopérative' },
