@@ -1,13 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
-import '../services/auth_service.dart';
-import '../services/api_service.dart';
-import 'voting_screen.dart';
-import 'explorer_screen.dart';
-import 'profile_screen.dart';
-import 'verification_screen.dart';
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +7,7 @@ import '../services/api_service.dart';
 import 'voting_screen.dart';
 import 'explorer_screen.dart';
 import 'profile_screen.dart';
+import 'verification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,6 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showNotification(String title, String body, VoidCallback onAction) {
+    // Nettoyer la notification précédente pour éviter l'effet "figé"
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -84,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
+        duration: const Duration(seconds: 3), // Disparaît après 3 secondes
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         action: SnackBarAction(
           label: 'VOIR',
