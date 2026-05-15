@@ -28,8 +28,8 @@ function generateBlocks(transactions) {
 
   // Un bloc pour chaque transaction
   transactions.forEach((tx, i) => {
-    const index = i + 1;
-    const timestamp = new Date(tx.date).getTime();
+    const index = i + 1    const timestamp = new Date(tx.date).getTime();
+;
     const data = { type: 'TRANSACTION', content: tx };
     const nonce = Math.floor(Math.random() * 1000);
     const hash = calculateHash(index, previousHash, timestamp, data, nonce);
