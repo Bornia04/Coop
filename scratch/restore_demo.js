@@ -1,7 +1,53 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const DB_PATH = path.resolve(__dirname, '../db.json');
+
+// Simulation simple de hachage de bloc
+function calculateHash(index, previousHash, timestamp, data, nonce) {
+  return crypto
+    .createHash('sha256')
+    .update(index + previousHash + timestamp + JSON.stringify(data) + nonce)
+    .digest('hex');
+}
+
+function generateBlocks(transactions) {
+  const blocks = [];
+  
+  // Bloc Genèse
+  let previousHash = "00000xGENESIS_BLOCK_DATA_HASH_SECURE";
+  blocks.push({
+    index: 0,
+    timestamp: 1714550400000,
+    data: { type: 'GENESIS', content: 'CoopLedger Genesis Block' },
+    previousHash: '0',
+    hash: previousHash,
+    nonce: 42
+  });
+
+  // Un bloc pour chaque transaction
+  transactions.forEach((tx, i) => {
+    const index = i + 1;
+    const timestamp = new Date(tx.date).getTime();
+    const data = { type: 'TRANSACTION', content: tx };
+    const nonce = Math.floor(Math.random() * 1000);
+    const hash = calculateHash(index, previousHash, timestamp, data, nonce);
+    
+    blocks.push({
+      index,
+      timestamp,
+      data,
+      previousHash,
+      hash: "0000" + hash.substring(4), // Simulation de Proof of Work (prefix 0000)
+      nonce
+    });
+    
+    previousHash = hash;
+  });
+
+  return blocks;
+}
 
 const members = [
   { name: "Jean-Pierre Mensah", id: "user_3", role: "membre" },
@@ -19,7 +65,6 @@ function generateTransactions(count) {
   const start = new Date("2026-05-01");
   const end = new Date("2026-05-15");
 
-  // 1. On commence par une grosse injection de capital pour être positif
   txs.push({
     id: `tx_init_0`,
     date: "2026-05-01",
@@ -36,13 +81,8 @@ function generateTransactions(count) {
   for (let i = 0; i < count; i++) {
     const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
     const member = members[Math.floor(Math.random() * members.length)];
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    
-    // On force plus de crédits ou des montants plus élevés pour les ventes
-    const isCredit = Math.random() > 0.4; // 60% de chances de crédit
+    const isCredit = Math.random() > 0.4;
     const type = isCredit ? "credit" : "debit";
-    
-    // Les ventes de cacao rapportent gros
     const amount = isCredit ? (Math.floor(Math.random() * 1500000) + 500000) : (Math.floor(Math.random() * 400000) + 50000);
     
     txs.push({
@@ -51,7 +91,7 @@ function generateTransactions(count) {
       description: `${isCredit ? "VENTE RECOLTE" : "ACHAT"} - ${member.name}`,
       amount: amount,
       type: type,
-      category: isCredit ? "VENTE CACAO" : category,
+      category: isCredit ? "VENTE CACAO" : categories[Math.floor(Math.random() * categories.length)],
       status: "confirmed",
       from: type === "credit" ? member.name : "Coopérative",
       to: type === "credit" ? "Coopérative" : "Fournisseur Agrée",
@@ -59,12 +99,14 @@ function generateTransactions(count) {
     });
   }
 
-  return txs.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return txs.sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
 function updateDB() {
   const db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
-  db.transactions = generateTransactions(60);
+  const transactions = generateTransactions(60);
+  db.transactions = [...transactions].reverse(); // Plus récent en premier pour l'affichage
+  db.blocks = generateBlocks(transactions); // Chronologique pour la chaine
   
   db.proposals = [
     {
@@ -80,25 +122,11 @@ function updateDB() {
       votesFor: 12,
       votesAgainst: 2,
       votes: []
-    },
-    {
-      id: "p_demo_2",
-      title: "Achat de 3 Nouveaux Tracteurs",
-      description: "Modernisation de la flotte pour la saison prochaine.",
-      amount: 15000000,
-      category: "Équipement",
-      createdBy: "Vladmir",
-      createdAt: "2026-05-12T08:00:00Z",
-      expiresAt: "2026-05-20T08:00:00Z",
-      status: "active",
-      votesFor: 8,
-      votesAgainst: 0,
-      votes: []
     }
   ];
 
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
-  console.log("Database updated with POSITIVE balance.");
+  console.log("Database updated with 61 Blocks in Blockchain Feed.");
 }
 
 updateDB();
