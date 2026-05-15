@@ -1,4 +1,5 @@
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,6 +18,10 @@ class ApiService {
 
     // URL de production par défaut
     const String prodUrl = 'https://coopledger3.netlify.app/api';
+
+    if (kIsWeb) {
+      return (const bool.fromEnvironment('dart.vm.product') ? prodUrl : 'http://localhost:3000/api');
+    }
 
     return Platform.isAndroid 
         ? (const bool.fromEnvironment('dart.vm.product') ? prodUrl : 'http://$_serverIp:3000/api') 

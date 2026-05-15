@@ -1,4 +1,5 @@
-import 'dart:io';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -24,7 +25,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool isMobile = Platform.isAndroid || Platform.isIOS;
+    bool isMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
     return Scaffold(
       backgroundColor: const Color(0xFF020617),
@@ -253,8 +254,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
               const SizedBox(height: 32),
               if (code.startsWith('coopledger://'))
                 ElevatedButton(
-                  onPressed: () {
-                    String finalUrl = ApiService.baseUrl.replaceAll('/api', '/app/reports/print') + '?' + code.split('?')[1];
+                  onPressed: () async {
+                    String baseUrl = await ApiService.getBaseUrl();
+                    String finalUrl = baseUrl.replaceAll('/api', '/app/reports/print') + '?' + code.split('?')[1];
                     // Si on est sur localhost/10.0.2.2, on remplace par une IP accessible si besoin, 
                     // mais ici on garde la logique ApiService.
                     _launchURL(finalUrl);
