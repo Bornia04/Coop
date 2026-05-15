@@ -82,21 +82,34 @@ const INITIAL_DATA = {
   ]
 };
 
+let memoryDB: any = null;
+
 function readDB() {
+  if (memoryDB) return memoryDB;
+
   const dir = path.dirname(DB_PATH);
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+    } catch (e) {
+      console.warn("Could not create DB directory, using memory only.");
+    }
   }
 
   let db: any;
   if (!fs.existsSync(DB_PATH)) {
     db = { ...INITIAL_DATA };
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    try {
+      fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    } catch (e) {
+      console.warn("Could not write initial DB file, using memory only.");
+    }
+    memoryDB = db;
     return db;
   } 
 
-  const content = fs.readFileSync(DB_PATH, 'utf-8');
   try {
+    const content = fs.readFileSync(DB_PATH, 'utf-8');
     db = content && content.trim() !== '' ? JSON.parse(content) : { ...INITIAL_DATA };
   } catch (e) {
     db = { ...INITIAL_DATA };
@@ -149,19 +162,29 @@ function readDB() {
     }
   });
 
-  if (changed || !fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+  if (changed) {
+    try {
+      fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    } catch (e) {
+      // Ignored in production
+    }
   }
 
+  memoryDB = db;
   return db;
 }
 
 export function writeDB(data: any) {
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+  memoryDB = data;
+  try {
+    const dir = path.dirname(DB_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.warn("Production Filesystem is Read-Only: Data saved in memory for this session.");
   }
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2));
 }
 
 export const getDB = () => readDB();
