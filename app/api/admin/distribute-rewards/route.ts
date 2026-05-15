@@ -31,14 +31,9 @@ export async function POST(req: Request) {
     
     // Créer un bloc pour cette distribution
     const lastBlock = db.blocks[db.blocks.length - 1];
-    const newBlock = {
-      index: db.blocks.length,
-      timestamp: Date.now(),
-      data: { type: 'REWARD_DISTRIBUTION', member: member.name, amount: amountPerMember },
-      previousHash: lastBlock ? lastBlock.hash : "0",
-      hash: ""
-    };
-    newBlock.hash = Blockchain.calculateHash(newBlock);
+    const previousHash = lastBlock ? lastBlock.hash : "00000000000000000000000000000000";
+    const blockData = { type: 'REWARD_DISTRIBUTION', member: member.name, amount: amountPerMember };
+    const newBlock = Blockchain.createBlock(db.blocks.length, blockData, previousHash);
     db.blocks.push(newBlock);
   }
 
