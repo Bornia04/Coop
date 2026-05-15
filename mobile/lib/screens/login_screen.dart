@@ -181,7 +181,14 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() => _isLoading = false);
 
       if (success && mounted) {
-        // Pas besoin de Navigator, le Consumer dans main.dart s'en occupe
+        // Succès
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Identifiants incorrects ou serveur injoignable'),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
       }
     } catch (e) {
       setState(() => _isLoading = false);

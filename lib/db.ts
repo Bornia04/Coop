@@ -46,38 +46,15 @@ export interface Proposal {
 
 const INITIAL_DATA = {
   users: [
-    { id: 'u1', email: 'president@coop.com', name: 'Jean Dupont', role: 'president', passwordHash: '123' },
-    { id: 'u2', email: 'tresorier@coop.com', name: 'Marie Curie', role: 'tresorier', passwordHash: '123' },
-    { id: 'u3', email: 'membre@coop.com', name: 'Paul Valéry', role: 'membre', passwordHash: '123' },
+    { id: 'user_1', name: 'Kofi', email: 'kofi@coop.tg', role: 'president', passwordHash: '123' },
+    { id: 'user_2', name: 'Ama', email: 'ama@coop.tg', role: 'tresorier', passwordHash: '123' },
+    { id: 'user_3', name: 'Jean-Pierre', email: 'jp@coop.tg', role: 'membre', passwordHash: '123' },
     { id: 'vlad', email: 'vlad@gmail.com', name: 'Vladmir', role: 'president', passwordHash: '123' },
     { id: 'the', email: 'the@gmail.com', name: 'Théodore', role: 'tresorier', passwordHash: '123' },
     { id: 'prevo', email: 'prevo@gmail.com', name: 'Prévost', role: 'membre', passwordHash: '123' }
   ],
-  transactions: [
-    { id: 'tx_20', date: '2024-04-10', description: "Vente Riz - Coopérative de la Vallée", amount: 4200000, type: 'credit', category: 'Ventes', txHash: '0xBC_RIZ_2024_001', status: 'confirmed', from: 'Acheteur Global', to: 'Coopérative' },
-    { id: 'tx_19', date: '2024-04-05', description: "Achat Système de Pompage Solaire", amount: 2800000, type: 'debit', category: 'Infrastructure', txHash: '0xBC_SOLAR_PUMP_2024', status: 'confirmed', from: 'Coopérative', to: 'SolarTech' },
-    { id: 'tx_18', date: '2024-03-25', description: "Exportation Ananas - Marché Européen", amount: 9500000, type: 'credit', category: 'Ventes', txHash: '0xBC_ANANAS_EXPORT_2024', status: 'confirmed', from: 'Membres', to: 'Coopérative' }
-  ],
-  proposals: [
-    { 
-      id: 'p5', title: 'Unité de transformation de manioc', description: 'Ajouter de la valeur à notre production en transformant le manioc en gari et tapioca sur place.', 
-      amount: 25000000, category: 'Infrastructure', createdBy: 'Président', createdAt: new Date().toISOString(), 
-      expiresAt: new Date(Date.now() + 10 * 24 * 3600000).toISOString(),
-      status: 'active', votesFor: 45, votesAgainst: 12, votes: [], txHash: '0xBlockchain_Manioc_Plan' 
-    },
-    { 
-      id: 'p1', title: 'Expansion du parc photovoltaïque', description: 'Installer des panneaux solaires supplémentaires sur le hangar nord pour réduire les coûts énergétiques.', 
-      amount: 15000000, category: 'Infrastructure', createdBy: 'Admin', createdAt: '2023-10-01', 
-      expiresAt: new Date(Date.now() + 30 * 24 * 3600000).toISOString(),
-      status: 'active', votesFor: 65, votesAgainst: 12, votes: [], txHash: '0x7d2f...1a9e' 
-    },
-    { 
-      id: 'p2', title: 'Achat groupé de tracteurs électriques', description: 'Renouveler la flotte de tracteurs avec des modèles électriques pour une agriculture durable.', 
-      amount: 45000000, category: 'Matériel', createdBy: 'Admin', createdAt: '2023-10-05', 
-      expiresAt: new Date(Date.now() + 15 * 24 * 3600000).toISOString(),
-      status: 'active', votesFor: 42, votesAgainst: 40, votes: [], txHash: '0x3a1b...8c4d' 
-    }
-  ],
+  transactions: [],
+  proposals: [],
   equipment: [
     { name: 'John Deere 8R #04', id: 'JD-2023-004', status: 'Opérationnel', color: '#10B981', date: '15 Apr 2024' },
     { name: 'Moissonneuse Class #01', id: 'CL-2022-001', status: 'En Maintenance', color: '#F59E0B', date: '28 Apr 2024' },
@@ -101,11 +78,6 @@ const INITIAL_DATA = {
       index: 0, timestamp: 1714550400000, 
       data: { type: 'GENESIS', content: 'CoopLedger Genesis Block' }, 
       previousHash: '0', hash: '00000xGENESIS_BLOCK_DATA_HASH_SECURE', nonce: 42 
-    },
-    { 
-      index: 1, timestamp: 1714636800000, 
-      data: { type: 'TRANSACTION', content: 'Initial Capital Injection' }, 
-      previousHash: '00000xGENESIS_BLOCK_DATA_HASH_SECURE', hash: '00000xINITIAL_DEPOSIT_HASH_V1', nonce: 128 
     }
   ]
 };
@@ -119,23 +91,25 @@ function readDB() {
   let db: any;
   if (!fs.existsSync(DB_PATH)) {
     db = { ...INITIAL_DATA };
-  } else {
-    const content = fs.readFileSync(DB_PATH, 'utf-8');
-    try {
-      db = content && content.trim() !== '' ? JSON.parse(content) : { ...INITIAL_DATA };
-    } catch (e) {
-      db = { ...INITIAL_DATA };
-    }
+    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    return db;
+  } 
+
+  const content = fs.readFileSync(DB_PATH, 'utf-8');
+  try {
+    db = content && content.trim() !== '' ? JSON.parse(content) : { ...INITIAL_DATA };
+  } catch (e) {
+    db = { ...INITIAL_DATA };
   }
 
-  // Assurer l'existence de toutes les tables avec données de secours si vides
-  db.users = (db.users && db.users.length > 0) ? db.users : INITIAL_DATA.users;
-  db.transactions = (db.transactions && db.transactions.length > 0) ? db.transactions : INITIAL_DATA.transactions;
-  db.proposals = (db.proposals && db.proposals.length > 0) ? db.proposals : INITIAL_DATA.proposals;
-  db.blocks = (db.blocks && db.blocks.length > 0) ? db.blocks : INITIAL_DATA.blocks;
-  db.equipment = (db.equipment && db.equipment.length > 0) ? db.equipment : INITIAL_DATA.equipment;
-  db.alerts = (db.alerts && db.alerts.length > 0) ? db.alerts : INITIAL_DATA.alerts;
-  db.equipmentStats = (db.equipmentStats && db.equipmentStats.length > 0) ? db.equipmentStats : INITIAL_DATA.equipmentStats;
+  // S'assurer que les tableaux existent sans écraser les données réelles
+  db.users = db.users || INITIAL_DATA.users;
+  db.transactions = db.transactions || [];
+  db.proposals = db.proposals || [];
+  db.blocks = db.blocks || INITIAL_DATA.blocks;
+  db.equipment = db.equipment || INITIAL_DATA.equipment;
+  db.alerts = db.alerts || INITIAL_DATA.alerts;
+  db.equipmentStats = db.equipmentStats || INITIAL_DATA.equipmentStats;
 
   // Auto-conclusion des votes expirés
   let changed = false;

@@ -4,9 +4,14 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // Sur Android Emulator, localhost est 10.0.2.2. Sur Linux/Web, c'est localhost.
+  // CONFIGURATION DU SERVEUR
+  // - Émulateur Android: 10.0.2.2
+  // - Appareil Physique: Utilisez votre IP locale (ex: 192.168.x.x)
+  // - Web/Linux: localhost
+  static const String _serverIp = '10.0.2.2'; // <--- CHANGEZ CECI PAR VOTRE IP SI APPAREIL PHYSIQUE
+  
   static final String baseUrl = Platform.isAndroid 
-      ? 'http://10.0.2.2:3000/api' 
+      ? 'http://$_serverIp:3000/api' 
       : 'http://localhost:3000/api';
 
   Future<Map<String, String>> _getHeaders() async {

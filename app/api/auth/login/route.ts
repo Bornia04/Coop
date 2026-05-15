@@ -17,7 +17,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 401 });
     }
 
-    const isValid = await AuthService.verifyPassword(password, user.password || user.passwordHash);
+    const storedPassword = user.passwordHash || user.password;
+    if (!storedPassword) {
+      return NextResponse.json({ error: 'Compte mal configuré' }, { status: 500 });
+    }
+
+    const isValid = await AuthService.verifyPassword(password, storedPassword);
     if (!isValid) {
       return NextResponse.json({ error: 'Mot de passe incorrect' }, { status: 401 });
     }
