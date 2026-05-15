@@ -13,7 +13,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _selectedRole = 'member';
+  String _selectedRole = 'membre';
   bool _isLoading = false;
 
   @override
@@ -88,8 +88,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               items: const [
-                DropdownMenuItem(value: 'member', child: Text('Membre')),
-                DropdownMenuItem(value: 'treasurer', child: Text('Trésorier')),
+                DropdownMenuItem(value: 'membre', child: Text('Membre')),
+                DropdownMenuItem(value: 'tresorier', child: Text('Trésorier')),
                 DropdownMenuItem(value: 'president', child: Text('Président')),
               ],
               onChanged: (val) => setState(() => _selectedRole = val!),
