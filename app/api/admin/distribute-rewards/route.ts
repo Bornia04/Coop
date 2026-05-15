@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDB, saveDB, addTransaction } from '@/lib/db';
+import { getDB, writeDB, addTransaction } from '@/lib/db';
 import { Blockchain } from '@/lib/blockchain';
 
 export async function POST(req: Request) {
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     db.blocks.push(newBlock);
   }
 
-  saveDB(db);
+  writeDB(db);
 
   return NextResponse.json({ 
     success: true, 
