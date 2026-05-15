@@ -78,8 +78,8 @@ export default function Dashboard() {
 
   if (loading) return <div className="flex h-full items-center justify-center text-primary font-black uppercase">Synchronisation du Ledger...</div>;
 
-  const totalRevenue = transactions.filter(t => t.type === 'credit').reduce((acc, t) => acc + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'debit').reduce((acc, t) => acc + t.amount, 0);
+  const totalRevenue = transactions.filter(t => t.type === 'credit').reduce((acc: number, t: any) => acc + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'debit').reduce((acc: number, t: any) => acc + t.amount, 0);
   const balance = totalRevenue - totalExpenses;
 
   return (

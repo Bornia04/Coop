@@ -30,10 +30,10 @@ export default function Depenses() {
 
   // Calcul des statistiques réelles
   const expenses = transactions.filter(t => t.type === 'debit');
-  const totalExpenses = expenses.reduce((acc, t) => acc + (t.amount || 0), 0);
+  const totalExpenses = expenses.reduce((acc: number, t: any) => acc + (t.amount || 0), 0);
   
   // Groupement par catégorie pour trouver le plus gros poste
-  const categoryMap = expenses.reduce((acc: any, t) => {
+  const categoryMap = expenses.reduce((acc: any, t: any) => {
     acc[t.category] = (acc[t.category] || 0) + t.amount;
     return acc;
   }, {});

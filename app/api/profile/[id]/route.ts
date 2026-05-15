@@ -13,14 +13,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const confirmedTx = db.transactions.filter((t: any) => t.status === 'confirmed');
   
   // Solde global de la coopérative
-  const totalIn = confirmedTx.filter((t: any) => t.type === 'credit').reduce((s, t) => s + t.amount, 0);
-  const totalOut = confirmedTx.filter((t: any) => t.type === 'debit').reduce((s, t) => s + t.amount, 0);
+  const totalIn = confirmedTx.filter((t: any) => t.type === 'credit').reduce((s: number, t: any) => s + t.amount, 0);
+  const totalOut = confirmedTx.filter((t: any) => t.type === 'debit').reduce((s: number, t: any) => s + t.amount, 0);
   const globalBalance = totalIn - totalOut;
 
   // Données spécifiques au membre
   const memberContributions = confirmedTx
     .filter((t: any) => t.from === user.name)
-    .reduce((s, t) => s + t.amount, 0);
+    .reduce((s: number, t: any) => s + t.amount, 0);
 
   // Simulation de primes basées sur la participation aux votes (Réaliste : 2000 FCFA par vote)
   const votedCount = db.proposals.filter((p: any) => p.votes && p.votes.some((v: any) => v.memberId === id)).length;

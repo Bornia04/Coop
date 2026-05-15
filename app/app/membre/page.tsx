@@ -27,8 +27,8 @@ export default function MembreView() {
 
   if (loading) return <div style={{ padding: '2rem' }}>Chargement...</div>;
 
-  const totalRevenue = transactions.filter(t => t.type === 'credit').reduce((acc, t) => acc + t.amount, 0);
-  const totalExpenses = transactions.filter(t => t.type === 'debit').reduce((acc, t) => acc + t.amount, 0);
+  const totalRevenue = transactions.filter(t => t.type === 'credit').reduce((acc: number, t: any) => acc + t.amount, 0);
+  const totalExpenses = transactions.filter(t => t.type === 'debit').reduce((acc: number, t: any) => acc + t.amount, 0);
   const balance = totalRevenue - totalExpenses;
 
   return (
