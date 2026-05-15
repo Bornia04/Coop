@@ -45,6 +45,15 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+          // Server Settings Button
+          Positioned(
+            top: 40,
+            right: 20,
+            child: IconButton(
+              icon: const Icon(Icons.settings_outlined, color: Colors.white70),
+              onPressed: _showServerSettings,
+            ),
+          ),
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
@@ -160,6 +169,57 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showServerSettings() async {
+    final currentUrl = await ApiService.getBaseUrl();
+    final controller = TextEditingController(text: currentUrl);
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0F172A),
+        title: const Text('Configuration Serveur', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Entrez l\'URL de votre serveur déployé (ex: https://votre-app.netlify.app/api)',
+              style: TextStyle(color: Colors.white70, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'https://...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await ApiService.setBaseUrl(controller.text);
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Configuration mise à jour !')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(minimumSize: const Size(100, 40)),
+            child: const Text('Sauvegarder'),
           ),
         ],
       ),

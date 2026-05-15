@@ -4,15 +4,27 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // CONFIGURATION DU SERVEUR
-  // - Émulateur Android: 10.0.2.2
-  // - Appareil Physique: Utilisez votre IP locale (ex: 192.168.x.x)
-  // - Web/Linux: localhost
-  static const String _serverIp = '10.0.2.2'; // <--- CHANGEZ CECI PAR VOTRE IP SI APPAREIL PHYSIQUE
-  
-  static final String baseUrl = Platform.isAndroid 
-      ? 'http://$_serverIp:3000/api' 
-      : 'http://localhost:3000/api';
+  static String _serverIp = '10.0.2.2';
+  static String? _customUrl;
+
+  static Future<String> getBaseUrl() async {
+    if (_customUrl != null) return _customUrl!;
+    
+    final prefs = await SharedPreferences.getInstance();
+    _customUrl = prefs.getString('api_url');
+    
+    if (_customUrl != null) return _customUrl!;
+
+    return Platform.isAndroid 
+        ? 'http://$_serverIp:3000/api' 
+        : 'http://localhost:3000/api';
+  }
+
+  static Future<void> setBaseUrl(String url) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('api_url', url);
+    _customUrl = url;
+  }
 
   Future<Map<String, String>> _getHeaders() async {
     final prefs = await SharedPreferences.getInstance();
@@ -25,8 +37,9 @@ class ApiService {
 
   Future<List<dynamic>> getTransactions() async {
     try {
+      final url = await getBaseUrl();
       final response = await http.get(
-        Uri.parse('$baseUrl/transactions'),
+        Uri.parse('$url/transactions'),
         headers: await _getHeaders(),
       );
       if (response.statusCode == 200) {
@@ -41,8 +54,9 @@ class ApiService {
 
   Future<List<dynamic>> getProposals() async {
     try {
+      final url = await getBaseUrl();
       final response = await http.get(
-        Uri.parse('$baseUrl/proposals'),
+        Uri.parse('$url/proposals'),
         headers: await _getHeaders(),
       );
       if (response.statusCode == 200) {
@@ -57,8 +71,9 @@ class ApiService {
 
   Future<List<dynamic>> getBlocks() async {
     try {
+      final url = await getBaseUrl();
       final response = await http.get(
-        Uri.parse('$baseUrl/blocks'),
+        Uri.parse('$url/blocks'),
         headers: await _getHeaders(),
       );
       if (response.statusCode == 200) {
@@ -73,8 +88,9 @@ class ApiService {
 
   Future<bool> castVote(String proposalId, String voteType, String memberId) async {
     try {
+      final url = await getBaseUrl();
       final response = await http.post(
-        Uri.parse('$baseUrl/vote'),
+        Uri.parse('$url/vote'),
         body: json.encode({
           'proposalId': proposalId,
           'vote': voteType == 'POUR' ? 'for' : 'against',
@@ -92,8 +108,9 @@ class ApiService {
 
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
+      final url = await getBaseUrl();
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
+        Uri.parse('$url/auth/login'),
         body: json.encode({
           'email': email,
           'password': password,
@@ -113,8 +130,9 @@ class ApiService {
 
   Future<Map<String, dynamic>?> register(String name, String email, String password, String role) async {
     try {
+      final url = await getBaseUrl();
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/register'),
+        Uri.parse('$url/auth/register'),
         body: json.encode({
           'name': name,
           'email': email,
@@ -136,8 +154,9 @@ class ApiService {
 
   Future<Map<String, dynamic>> getProfile(String userId) async {
     try {
+      final url = await getBaseUrl();
       final response = await http.get(
-        Uri.parse('$baseUrl/profile/$userId'),
+        Uri.parse('$url/profile/$userId'),
         headers: await _getHeaders(),
       );
       if (response.statusCode == 200) {
