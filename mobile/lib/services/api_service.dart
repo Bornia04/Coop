@@ -16,16 +16,8 @@ class ApiService {
     
     if (_customUrl != null) return _customUrl!;
 
-    // URL de production par défaut
-    const String prodUrl = 'https://coopledger3.netlify.app/api';
-
-    if (kIsWeb) {
-      return (const bool.fromEnvironment('dart.vm.product') ? prodUrl : 'http://localhost:3000/api');
-    }
-
-    return Platform.isAndroid 
-        ? (const bool.fromEnvironment('dart.vm.product') ? prodUrl : 'http://$_serverIp:3000/api') 
-        : (const bool.fromEnvironment('dart.vm.product') ? prodUrl : 'http://localhost:3000/api');
+    // URL de production par défaut (Netlify)
+    return 'https://coopledger3.netlify.app/api';
   }
 
   static Future<void> setBaseUrl(String url) async {
