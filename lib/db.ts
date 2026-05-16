@@ -285,7 +285,7 @@ export const addProposal = (p: Partial<Proposal>) => {
     createdAt: new Date().toISOString(),
     expiresAt: p.expiresAt || (p.durationHours 
       ? new Date(Date.now() + p.durationHours * 3600000).toISOString() 
-      : new Date(Date.now() + 2 * 60000).toISOString()), // 2 min par défaut
+      : new Date(Date.now() + 5 * 60000).toISOString()), // 5 min par défaut pour la démo
     status: 'active',
     votesFor: 0,
     votesAgainst: 0,

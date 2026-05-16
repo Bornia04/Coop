@@ -11,7 +11,7 @@ export default function NewProposal() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ txHash: string; block: number } | null>(null);
-  const [form, setForm] = useState({ title: '', description: '', amount: '', category: 'Engrais', durationHours: '0.0333' });
+  const [form, setForm] = useState({ title: '', description: '', amount: '', category: 'Engrais', durationHours: '0.0833' });
   const { notify } = useNotify();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -162,7 +162,7 @@ export default function NewProposal() {
                 ? "bg-red-50 border-red-200 shadow-lg shadow-red-100" 
                 : "bg-slate-50 border-slate-100 hover:bg-slate-100"
             }`}
-            onClick={() => setForm({...form, durationHours: form.durationHours === '0.0166' ? '0.0333' : '0.0166'})}
+            onClick={() => setForm({...form, durationHours: form.durationHours === '0.0166' ? '0.0833' : '0.0166'})}
           >
             <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${
               form.durationHours === '0.0166' ? "bg-red-500 border-red-500" : "border-slate-300 bg-white"
