@@ -5,9 +5,21 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // CONFIGURATION PRÉSENTATION : Remplacez par votre IP locale si besoin
-  // (10.0.2.2 est l'adresse pour l'émulateur Android vers l'ordinateur)
-  static const String LOCAL_URL = 'http://10.0.2.2:3000/api'; 
+  // Détection intelligente de l'adresse locale
+  static String get _localBase {
+    if (kIsWeb) return 'http://localhost:3000/api';
+    try {
+      if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
+      if (Platform.isIOS || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+        return 'http://localhost:3000/api';
+      }
+    } catch (e) {
+      return 'http://localhost:3000/api';
+    }
+    return 'http://localhost:3000/api';
+  }
+
+  static final String LOCAL_URL = _localBase;
   static const String PROD_URL = 'https://coopledger3.netlify.app/api';
   
   static String? _customUrl;
