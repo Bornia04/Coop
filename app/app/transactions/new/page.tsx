@@ -31,8 +31,12 @@ export default function NewTransaction() {
       body: JSON.stringify(newTx)
     });
 
+    const data = await res.json();
+
     if (res.ok) {
       setResult({ txHash });
+    } else {
+      alert(data.error || 'Erreur lors de l\'enregistrement');
     }
     setSubmitting(false);
   };

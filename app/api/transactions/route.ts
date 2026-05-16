@@ -30,8 +30,8 @@ export async function POST(req: Request) {
     };
     addTransaction(newTx);
     return NextResponse.json(newTx);
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error);
-    return NextResponse.json({ error: 'Failed to add transaction' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to add transaction' }, { status: 400 });
   }
 }

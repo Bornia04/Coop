@@ -262,6 +262,18 @@ import { Blockchain } from './blockchain';
 
 export const addTransaction = (tx: Transaction) => {
   const db = readDB();
+
+  // Vérification du solde pour les débits
+  if (tx.type === 'debit') {
+    const balance = db.transactions.reduce((acc: number, t: any) => {
+      return acc + (t.type === 'credit' ? Number(t.amount) : -Number(t.amount));
+    }, 0);
+
+    if (Number(tx.amount) > balance) {
+      throw new Error('Solde insuffisant pour cette dépense');
+    }
+  }
+
   db.transactions.unshift(tx);
   
   // Scellage Blockchain
