@@ -9,12 +9,12 @@ class ApiService {
   static String? _customUrl;
 
   static Future<String> getBaseUrl() async {
-    if (_customUrl != null) return _customUrl!;
+    if (_customUrl != null && _customUrl!.isNotEmpty) return _customUrl!;
     
     final prefs = await SharedPreferences.getInstance();
     _customUrl = prefs.getString('api_url');
     
-    if (_customUrl != null) return _customUrl!;
+    if (_customUrl != null && _customUrl!.isNotEmpty) return _customUrl!;
 
     // URL de production par défaut (Netlify)
     return 'https://coopledger3.netlify.app/api';
