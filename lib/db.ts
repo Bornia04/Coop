@@ -47,12 +47,12 @@ export interface Proposal {
 
 const INITIAL_DATA = {
   users: [
-    { id: 'user_1', name: 'Kofi', email: 'kofi@coop.tg', role: 'president', passwordHash: '123' },
-    { id: 'user_2', name: 'Ama', email: 'ama@coop.tg', role: 'tresorier', passwordHash: '123' },
-    { id: 'user_3', name: 'Jean-Pierre', email: 'jp@coop.tg', role: 'membre', passwordHash: '123' },
-    { id: 'vlad', email: 'vlad@gmail.com', name: 'Vladmir', role: 'president', passwordHash: '123' },
-    { id: 'the', email: 'the@gmail.com', name: 'Théodore', role: 'tresorier', passwordHash: '123' },
-    { id: 'prevo', email: 'prevo@gmail.com', name: 'Prévost', role: 'membre', passwordHash: '123' }
+    { id: 'Kofi', name: 'Kofi', email: 'kofi@coop.tg', role: 'president', passwordHash: '123' },
+    { id: 'Ama', name: 'Ama', email: 'ama@coop.tg', role: 'tresorier', passwordHash: '123' },
+    { id: 'Jean-Pierre', name: 'Jean-Pierre', email: 'jp@coop.tg', role: 'membre', passwordHash: '123' },
+    { id: 'Vladmir', email: 'vlad@gmail.com', name: 'Vladmir', role: 'president', passwordHash: '123' },
+    { id: 'Théodore', email: 'the@gmail.com', name: 'Théodore', role: 'tresorier', passwordHash: '123' },
+    { id: 'Prévost', email: 'prevo@gmail.com', name: 'Prévost', role: 'membre', passwordHash: '123' }
   ],
   transactions: [
     {
@@ -100,8 +100,8 @@ const INITIAL_DATA = {
       votesFor: 2,
       votesAgainst: 0,
       votes: [
-        { memberId: 'user_3', vote: 'for', txHash: '0xv1' },
-        { memberId: 'prevo', vote: 'for', txHash: '0xv2' }
+        { memberId: 'Jean-Pierre', vote: 'for', txHash: '0xv1' },
+        { memberId: 'Prévost', vote: 'for', txHash: '0xv2' }
       ]
     },
     {
