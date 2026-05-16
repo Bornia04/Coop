@@ -14,26 +14,38 @@ class VotingScreen extends StatefulWidget {
 
 class _VotingScreenState extends State<VotingScreen> {
   final ApiService _apiService = ApiService();
-  late Future<List<dynamic>> _proposalsFuture;
+  List<dynamic> _proposals = [];
+  bool _isLoading = true;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _proposalsFuture = _apiService.getProposals();
-    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _refreshProposals());
+    _fetchProposals();
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _fetchProposals(silent: true));
   }
+
+  Future<void> _fetchProposals({bool silent = false}) async {
+    if (!silent) setState(() => _isLoading = true);
+    try {
+      final data = await _apiService.getProposals();
+      if (mounted) {
+        setState(() {
+          _proposals = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _refreshProposals() => _fetchProposals();
 
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
-  }
-
-  void _refreshProposals() {
-    setState(() {
-      _proposalsFuture = _apiService.getProposals();
-    });
   }
 
   @override
@@ -57,60 +69,47 @@ class _VotingScreenState extends State<VotingScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: _proposalsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)));
-          }
-          
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('Aucune proposition active trouvée.', style: TextStyle(color: Colors.white54)),
-            );
-          }
+      body: _isLoading && _proposals.isEmpty
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF10B981)))
+          : (_proposals.isEmpty
+              ? const Center(child: Text('Aucune proposition active trouvée.', style: TextStyle(color: Colors.white54)))
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  itemCount: _proposals.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Votes Actifs',
+                            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'Participez aux décisions de votre coopérative',
+                            style: TextStyle(color: Colors.white54, fontSize: 16),
+                          ),
+                          SizedBox(height: 40),
+                        ],
+                      );
+                    }
 
-          final proposals = snapshot.data!;
+                    final p = _proposals[index - 1];
+                    final totalVotes = (p['votesFor'] ?? 0) + (p['votesAgainst'] ?? 0);
+                    final progress = totalVotes == 0 ? 0.0 : (p['votesFor'] ?? 0) / totalVotes;
 
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            itemCount: proposals.length + 1,
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Votes Actifs',
-                      style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Participez aux décisions de votre coopérative',
-                      style: TextStyle(color: Colors.white54, fontSize: 16),
-                    ),
-                    SizedBox(height: 40),
-                  ],
-                );
-              }
-
-              final p = proposals[index - 1];
-              final totalVotes = (p['votesFor'] ?? 0) + (p['votesAgainst'] ?? 0);
-              final progress = totalVotes == 0 ? 0.0 : (p['votesFor'] ?? 0) / totalVotes;
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24.0),
-                child: _buildVoteCard(
-                  context,
-                  p,
-                  progress,
-                  auth.userId ?? 'anonymous',
-                ),
-              );
-            },
-          );
-        },
-      ),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: _buildVoteCard(
+                        context,
+                        p,
+                        progress,
+                        auth.userId ?? 'anonymous',
+                      ),
+                    );
+                  },
+                )),
     );
   }
 
