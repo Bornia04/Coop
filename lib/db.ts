@@ -214,7 +214,9 @@ export const addProposal = (p: Partial<Proposal>) => {
     category: p.category || 'Général',
     createdBy: p.createdBy || 'Anonyme',
     createdAt: new Date().toISOString(),
-    expiresAt: p.expiresAt || new Date(Date.now() + 4 * 60000).toISOString(), // 4 min par défaut
+    expiresAt: p.expiresAt || (p.durationHours 
+      ? new Date(Date.now() + (p as any).durationHours * 3600000).toISOString() 
+      : new Date(Date.now() + 2 * 60000).toISOString()), // 2 min par défaut
     status: 'active',
     votesFor: 0,
     votesAgainst: 0,
