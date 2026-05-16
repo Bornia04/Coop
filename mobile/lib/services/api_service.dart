@@ -121,10 +121,11 @@ class ApiService {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
-      return null;
+      final errorData = json.decode(response.body);
+      throw Exception(errorData['error'] ?? 'Identifiants incorrects');
     } catch (e) {
       print('Erreur Login API: $e');
-      return null;
+      rethrow;
     }
   }
 
@@ -145,10 +146,11 @@ class ApiService {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       }
-      return null;
+      final errorData = json.decode(response.body);
+      throw Exception(errorData['error'] ?? 'Erreur lors de l\'inscription');
     } catch (e) {
       print('Erreur Register API: $e');
-      return null;
+      rethrow;
     }
   }
 

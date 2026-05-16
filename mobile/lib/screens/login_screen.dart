@@ -239,22 +239,14 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       
       setState(() => _isLoading = false);
-
-      if (success && mounted) {
-        // Succès
-      } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Identifiants incorrects ou serveur injoignable'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur de connexion: $e')),
-      );
+      if (mounted) {
+        String message = e.toString().replaceAll('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.redAccent),
+        );
+      }
     }
   }
 }
