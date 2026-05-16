@@ -11,7 +11,7 @@ export default function NewProposal() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ txHash: string; block: number } | null>(null);
-  const [form, setForm] = useState({ title: '', description: '', amount: '', category: 'Engrais', durationHours: '72' });
+  const [form, setForm] = useState({ title: '', description: '', amount: '', category: 'Engrais', durationHours: '0.0333' });
   const { notify } = useNotify();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -158,22 +158,22 @@ export default function NewProposal() {
 
           <div 
             className={`p-6 rounded-2xl border transition-all duration-300 flex items-center gap-4 cursor-pointer ${
-              form.durationHours === '0.0333'
+              form.durationHours === '0.0166'
                 ? "bg-red-50 border-red-200 shadow-lg shadow-red-100" 
                 : "bg-slate-50 border-slate-100 hover:bg-slate-100"
             }`}
-            onClick={() => setForm({...form, durationHours: form.durationHours === '0.0333' ? '72' : '0.0333'})}
+            onClick={() => setForm({...form, durationHours: form.durationHours === '0.0166' ? '0.0333' : '0.0166'})}
           >
             <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${
-              form.durationHours === '0.0333' ? "bg-red-500 border-red-500" : "border-slate-300 bg-white"
+              form.durationHours === '0.0166' ? "bg-red-500 border-red-500" : "border-slate-300 bg-white"
             }`}>
-              {form.durationHours === '0.0333' && <div className="w-2 h-2 bg-white rounded-full animate-pulse" />}
+              {form.durationHours === '0.0166' && <div className="w-2 h-2 bg-white rounded-full animate-pulse" />}
             </div>
             <div>
               <p className={`text-xs font-black uppercase tracking-widest ${
-                form.durationHours === '0.0333' ? "text-red-600" : "text-slate-600"
+                form.durationHours === '0.0166' ? "text-red-600" : "text-slate-600"
               }`}>
-                Proposition Urgente (Vote de 2 minutes)
+                Proposition Urgente (Vote de 1 minute)
               </p>
             </div>
           </div>
