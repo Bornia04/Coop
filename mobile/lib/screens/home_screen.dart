@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         backgroundColor: const Color(0xFF10B981),
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 3), // Disparaît après 3 secondes
+        duration: const Duration(seconds: 5), // Disparaît après 5 secondes
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         action: SnackBarAction(
           label: 'VOIR',
@@ -95,9 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final props = await _apiService.getProposals();
 
       if (mounted) {
-        if (props.length > _lastProposalCount) {
-          final newProp = props.last;
-          _showNotification('Nouvelle proposition', newProp['title'], () {
+        if (props.isNotEmpty && props.length > _lastProposalCount) {
+          final newProp = props.first; // Les nouvelles propositions sont ajoutées au début (unshift)
+          _showNotification('Nouveau Vote Ouvert', newProp['title'], () {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const VotingScreen()));
           });
         }

@@ -15,11 +15,19 @@ class VotingScreen extends StatefulWidget {
 class _VotingScreenState extends State<VotingScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<dynamic>> _proposalsFuture;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _proposalsFuture = _apiService.getProposals();
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) => _refreshProposals());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   void _refreshProposals() {
