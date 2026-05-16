@@ -13,14 +13,7 @@ class ApiService {
   static String? _customUrl;
 
   static Future<String> getBaseUrl() async {
-    if (_customUrl != null && _customUrl!.isNotEmpty) return _customUrl!;
-    
-    final prefs = await SharedPreferences.getInstance();
-    _customUrl = prefs.getString('api_url');
-    
-    if (_customUrl != null && _customUrl!.isNotEmpty) return _customUrl!;
-
-    // PAR DÉFAUT POUR LA PRÉSENTATION LOCALE
+    // FORCE LOCAL POUR LA PRÉSENTATION
     return LOCAL_URL; 
   }
 
