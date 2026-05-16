@@ -54,8 +54,71 @@ const INITIAL_DATA = {
     { id: 'the', email: 'the@gmail.com', name: 'Théodore', role: 'tresorier', passwordHash: '123' },
     { id: 'prevo', email: 'prevo@gmail.com', name: 'Prévost', role: 'membre', passwordHash: '123' }
   ],
-  transactions: [],
-  proposals: [],
+  transactions: [
+    {
+      id: 'tx_1',
+      date: '2024-05-15',
+      description: 'Vente de 50 sacs de maïs',
+      amount: 1500000,
+      type: 'credit',
+      category: 'Ventes',
+      txHash: '0x742...8a91',
+      status: 'confirmed'
+    },
+    {
+      id: 'tx_2',
+      date: '2024-05-14',
+      description: 'Achat de semences améliorées',
+      amount: 450000,
+      type: 'debit',
+      category: 'Intrants',
+      txHash: '0x321...4b22',
+      status: 'confirmed'
+    },
+    {
+      id: 'tx_3',
+      date: '2024-05-12',
+      description: 'Main d\'œuvre récolte',
+      amount: 200000,
+      type: 'debit',
+      category: 'Salaires',
+      txHash: '0x998...1c34',
+      status: 'confirmed'
+    }
+  ],
+  proposals: [
+    {
+      id: 'p_demo_1',
+      title: 'Achat d\'un système d\'irrigation solaire',
+      description: 'Permettra de cultiver en saison sèche sur 5 hectares.',
+      amount: 2500000,
+      category: 'Infrastructure',
+      createdBy: 'Vladmir',
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+      expiresAt: new Date(Date.now() + 7200000).toISOString(),
+      status: 'active',
+      votesFor: 2,
+      votesAgainst: 0,
+      votes: [
+        { memberId: 'user_3', vote: 'for', txHash: '0xv1' },
+        { memberId: 'prevo', vote: 'for', txHash: '0xv2' }
+      ]
+    },
+    {
+      id: 'p_demo_2',
+      title: 'Réparation du tracteur John Deere',
+      description: 'Remplacement de la pompe hydraulique.',
+      amount: 350000,
+      category: 'Maintenance',
+      createdBy: 'Théodore',
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      expiresAt: new Date(Date.now() - 3600000).toISOString(),
+      status: 'approved',
+      votesFor: 12,
+      votesAgainst: 1,
+      votes: []
+    }
+  ],
   equipment: [
     { name: 'John Deere 8R #04', id: 'JD-2023-004', status: 'Opérationnel', color: '#10B981', date: '15 Apr 2024' },
     { name: 'Moissonneuse Class #01', id: 'CL-2022-001', status: 'En Maintenance', color: '#F59E0B', date: '28 Apr 2024' },
@@ -79,6 +142,11 @@ const INITIAL_DATA = {
       index: 0, timestamp: 1714550400000, 
       data: { type: 'GENESIS', content: 'CoopLedger Genesis Block' }, 
       previousHash: '0', hash: '00000xGENESIS_BLOCK_DATA_HASH_SECURE', nonce: 42 
+    },
+    { 
+      index: 1, timestamp: 1714551400000, 
+      data: { type: 'TRANSACTION', content: 'Vente Maïs #01' }, 
+      previousHash: '00000xGENESIS_BLOCK_DATA_HASH_SECURE', hash: '00000xTX_BLOCK_1', nonce: 88
     }
   ]
 };
