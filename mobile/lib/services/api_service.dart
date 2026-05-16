@@ -5,7 +5,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static String _serverIp = '10.0.2.2';
+  // CONFIGURATION PRÉSENTATION : Remplacez par votre IP locale si besoin
+  // (10.0.2.2 est l'adresse pour l'émulateur Android vers l'ordinateur)
+  static const String LOCAL_URL = 'http://10.0.2.2:3000/api'; 
+  static const String PROD_URL = 'https://coopledger3.netlify.app/api';
+  
   static String? _customUrl;
 
   static Future<String> getBaseUrl() async {
@@ -16,8 +20,8 @@ class ApiService {
     
     if (_customUrl != null && _customUrl!.isNotEmpty) return _customUrl!;
 
-    // URL de production par défaut (Netlify)
-    return 'https://coopledger3.netlify.app/api';
+    // PAR DÉFAUT POUR LA PRÉSENTATION LOCALE
+    return LOCAL_URL; 
   }
 
   static Future<void> setBaseUrl(String url) async {
