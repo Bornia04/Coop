@@ -40,6 +40,7 @@ export interface Proposal {
   votesFor: number;
   votesAgainst: number;
   votes: { memberId: string; vote: 'for' | 'against'; txHash: string }[];
+  durationHours?: number;
   txHash?: string;
   blockNumber?: number;
 }
@@ -215,7 +216,7 @@ export const addProposal = (p: Partial<Proposal>) => {
     createdBy: p.createdBy || 'Anonyme',
     createdAt: new Date().toISOString(),
     expiresAt: p.expiresAt || (p.durationHours 
-      ? new Date(Date.now() + (p as any).durationHours * 3600000).toISOString() 
+      ? new Date(Date.now() + p.durationHours * 3600000).toISOString() 
       : new Date(Date.now() + 2 * 60000).toISOString()), // 2 min par défaut
     status: 'active',
     votesFor: 0,
